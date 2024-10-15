@@ -21,6 +21,7 @@ public enum ErrorCode {
     ROLE_NAME_EXISTED(400,"Role name existed!"),
     ROLE_NOTFOUND(404,"Role not found!"),
     REFRESH_TOKEN_EXPIRED(400,"Refresh token expired!"),
+    TOKEN_EXPIRED(400,"Token expired!"),
     ;
 
     ErrorCode(int code, String message) {

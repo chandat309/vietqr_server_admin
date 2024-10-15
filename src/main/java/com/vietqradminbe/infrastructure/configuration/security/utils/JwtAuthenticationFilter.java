@@ -9,8 +9,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.vietqradminbe.domain.exceptions.BadRequestException;
+import com.vietqradminbe.domain.exceptions.ErrorCode;
 import com.vietqradminbe.domain.models.User;
 import com.vietqradminbe.domain.repositories.RoleRepository;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -40,6 +43,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (ExpiredJwtException e) {
+            throw new BadRequestException(ErrorCode.TOKEN_EXPIRED);
         }
     }
 

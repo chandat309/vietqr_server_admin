@@ -1,8 +1,11 @@
 package com.vietqradminbe.infrastructure.configuration.security;
 
+import com.vietqradminbe.domain.exceptions.BadRequestException;
+import com.vietqradminbe.domain.exceptions.ErrorCode;
 import com.vietqradminbe.infrastructure.configuration.security.utils.JwtAuthenticationFilter;
 import com.vietqradminbe.infrastructure.configuration.security.utils.JwtAuthorizationFilter;
 import com.vietqradminbe.infrastructure.configuration.security.utils.JwtUtil;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,29 +37,37 @@ public class ApplicationSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(requests -> {
-                    RequestMatcher[] whiteListMatchers = Arrays.stream(WHITE_LIST_URL)
-                            .map(AntPathRequestMatcher::new)
-                            .toArray(RequestMatcher[]::new);
+        try {
+            httpSecurity.csrf(AbstractHttpConfigurer::disable)
+                    .authorizeHttpRequests(requests -> {
+                        RequestMatcher[] whiteListMatchers = Arrays.stream(WHITE_LIST_URL)
+                                .map(AntPathRequestMatcher::new)
+                                .toArray(RequestMatcher[]::new);
 
-                    requests.requestMatchers(whiteListMatchers).permitAll()
-                            //authorize for admin role
-                            .requestMatchers(new AntPathRequestMatcher("/api/v1/users")).hasAuthority("ADMIN_ROLE")
-                            .anyRequest()
-                            .authenticated();
-                })
-                .headers(headers -> headers
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)  // Allow frames from the same origin
-                )
-                .addFilter(new JwtAuthenticationFilter(authenticationManager(httpSecurity.getSharedObject(AuthenticationConfiguration.class)), jwtUtil))
-                .addFilter(new JwtAuthorizationFilter(authenticationManager(httpSecurity.getSharedObject(AuthenticationConfiguration.class)), jwtUtil, customUserDetailsService));
-        return httpSecurity.build();
+                        requests.requestMatchers(whiteListMatchers).permitAll()
+                                //authorize for admin role
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/users")).hasAuthority("ADMIN_ROLE")
+                                .anyRequest()
+                                .authenticated();
+                    })
+                    .headers(headers -> headers
+                            .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)  // Allow frames from the same origin
+                    )
+                    .addFilter(new JwtAuthenticationFilter(authenticationManager(httpSecurity.getSharedObject(AuthenticationConfiguration.class)), jwtUtil))
+                    .addFilter(new JwtAuthorizationFilter(authenticationManager(httpSecurity.getSharedObject(AuthenticationConfiguration.class)), jwtUtil, customUserDetailsService));
+            return httpSecurity.build();
+        } catch (ExpiredJwtException e) {
+            throw new BadRequestException(ErrorCode.TOKEN_EXPIRED);
+        }
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+        try {
+            return authenticationConfiguration.getAuthenticationManager();
+        } catch (ExpiredJwtException e) {
+            throw new BadRequestException(ErrorCode.TOKEN_EXPIRED);
+        }
     }
 
     @Bean

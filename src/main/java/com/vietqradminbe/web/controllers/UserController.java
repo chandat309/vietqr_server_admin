@@ -1,8 +1,11 @@
 package com.vietqradminbe.web.controllers;
 
 import com.vietqradminbe.application.services.UserService;
+import com.vietqradminbe.domain.exceptions.BadRequestException;
+import com.vietqradminbe.domain.exceptions.ErrorCode;
 import com.vietqradminbe.domain.models.User;
 import com.vietqradminbe.web.dto.response.APIResponse;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -36,8 +39,10 @@ public class UserController {
             response.setCode(200);
             response.setMessage("Get successfully!");
             response.setResult(users);
+        } catch (ExpiredJwtException e) {
+            throw new BadRequestException(ErrorCode.TOKEN_EXPIRED);
         } catch (Exception e) {
-            logger.error(UserController.class +": ERROR: getUser: " + e.getMessage()
+            logger.error(UserController.class + ": ERROR: getUser: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             response.setCode(400);
             response.setMessage("E1005");

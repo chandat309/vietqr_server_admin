@@ -17,6 +17,7 @@ import com.vietqradminbe.web.dto.request.UserCreationRequest;
 import com.vietqradminbe.web.dto.response.APIResponse;
 import com.vietqradminbe.web.dto.response.RefreshTokenResponse;
 import com.vietqradminbe.web.dto.response.UserLoginResponse;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -56,53 +57,52 @@ public class AuthController {
     @PostMapping("/login")
     public APIResponse<UserLoginResponse> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws BadCredentialsException {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername().trim(), authenticationRequest.getPassword().trim()));
+            final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername().trim());
+
+            final String jwt = jwtUtil.generateToken(userDetails);
+
+            //generate refresh token
+
+            User user = userService.getUserByUsername(userDetails.getUsername());
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+
+
+            //set response
+            List<String> roles = roleService.getRolesNameByUsername(user.getUsername());
+            UserLoginResponse userLoginResponse = new UserLoginResponse();
+            userLoginResponse.setUsername(user.getUsername());
+            userLoginResponse.setRefreshToken(refreshToken.getToken());
+            userLoginResponse.setId(user.getId());
+            userLoginResponse.setEmail(user.getEmail());
+            userLoginResponse.setIsActive(user.getIsActive());
+            userLoginResponse.setTokenType("Bearer ");
+            userLoginResponse.setAccessToken(jwt);
+            userLoginResponse.setRoles(roles);
+
+            APIResponse<UserLoginResponse> response = new APIResponse<>();
+            response.setCode(200);
+            response.setMessage("Success");
+            response.setResult(userLoginResponse);
+            return response;
         } catch (BadCredentialsException badCredentialsException) {
             logger.error("Incorrect username or password");
-            throw badCredentialsException;
+            throw new BadRequestException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
         }
-
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-
-        final String jwt = jwtUtil.generateToken(userDetails);
-
-        //generate refresh token
-
-        User user = userService.getUserByUsername(userDetails.getUsername());
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
-
-
-        //set response
-        List<String> roles = roleService.getRolesNameByUsername(user.getUsername());
-        UserLoginResponse userLoginResponse = new UserLoginResponse();
-        userLoginResponse.setUsername(user.getUsername());
-        userLoginResponse.setRefreshToken(refreshToken.getToken());
-        userLoginResponse.setId(user.getId());
-        userLoginResponse.setEmail(user.getEmail());
-        userLoginResponse.setIsActive(user.getIsActive());
-        userLoginResponse.setTokenType("Bearer ");
-        userLoginResponse.setAccessToken(jwt);
-        userLoginResponse.setRoles(roles);
-
-        APIResponse<UserLoginResponse> response = new APIResponse<>();
-        response.setCode(200);
-        response.setMessage("Success");
-        response.setResult(userLoginResponse);
-        return response;
     }
 
     @PostMapping("/refreshtoken")
     public APIResponse<RefreshTokenResponse> refreshtoken(@Valid @RequestBody RefreshTokenRequest request) {
-        String requestRefreshToken = request.getRefreshToken();
+        String requestRefreshToken = request.getRefreshToken().trim();
         User userExisted = userService.getUserByRefreshToken(requestRefreshToken);
-        if(userExisted == null) {
+        if (userExisted == null) {
             throw new BadRequestException(ErrorCode.USER_NOTFOUND);
         }
         final UserDetails userDetails = userDetailsService.loadUserByUsername(userExisted.getUsername());
 
         String token = jwtUtil.generateToken(userDetails);
         RefreshTokenResponse refreshTokenResponse = new RefreshTokenResponse();
-        refreshTokenResponse.setRefreshToken(request.getRefreshToken());
+        refreshTokenResponse.setRefreshToken(request.getRefreshToken().trim());
         refreshTokenResponse.setTokenType("Bearer ");
         refreshTokenResponse.setAccessToken(token);
 

@@ -51,12 +51,14 @@ public class UserService implements IUserService {
     @Override
     @Transactional
     public User createUserRequest(UserCreationRequest request) {
+        request.setUsername(request.getUsername().trim());
+        request.setPassword(request.getPassword().trim());
         if (userRepo.getUserByUsername(request.getUsername()) != null) {
             throw new BadRequestException(ErrorCode.ACCOUNT_EXISTED);
         }
         //create user first
         User user = userMapper.toUser(request);
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword().trim()));
         user.setCreateAt(TimeHelperUtil.getCurrentTime());
         user.setUpdateAt(" ");
         user.setId(UUID.randomUUID().toString());

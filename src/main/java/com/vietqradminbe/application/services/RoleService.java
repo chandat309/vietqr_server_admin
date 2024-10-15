@@ -46,8 +46,9 @@ public class RoleService implements IRoleService {
     @Override
     public void createRoleRequest(RoleCreationRequest request) {
         List<Role> roles = roleRepository.getRolesByRoleName(request.getRoleName());
-        if(roles.isEmpty()) {
+        if (roles.isEmpty()) {
             Role role = roleMapper.toRole(request);
+            role.setRoleName(request.getRoleName().trim());
             role.setCreateAt(TimeHelperUtil.getCurrentTime());
             role.setUpdateAt("");
             role.setId(UUID.randomUUID().toString());
