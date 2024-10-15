@@ -26,7 +26,7 @@ public class RoleController {
     static Logger logger = Logger.getLogger(RoleController.class.getName());
     RoleService roleService;
 
-    @PostMapping("role")
+    @PostMapping("roles")
     public APIResponse<String> createRole(@RequestBody @Valid RoleCreationRequest request) {
         APIResponse<String> response = new APIResponse<>();
         try {

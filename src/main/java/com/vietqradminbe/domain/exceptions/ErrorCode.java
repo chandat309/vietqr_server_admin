@@ -22,6 +22,7 @@ public enum ErrorCode {
     ROLE_NOTFOUND(404,"Role not found!"),
     REFRESH_TOKEN_EXPIRED(400,"Refresh token expired!"),
     TOKEN_EXPIRED(400,"Token expired!"),
+    OLD_PASSWORD_NOT_ALLOWED(400,"Old password not allowed!"),
     ;
 
     ErrorCode(int code, String message) {

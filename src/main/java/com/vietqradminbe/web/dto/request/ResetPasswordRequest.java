@@ -9,7 +9,8 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationRequest implements Serializable {
-    private String username;
-    private String password;
+public class ResetPasswordRequest implements Serializable {
+    private String id;
+    private String oldPassword;
+    private String newPassword;
 }

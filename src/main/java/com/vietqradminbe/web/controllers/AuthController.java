@@ -6,6 +6,7 @@ import com.vietqradminbe.application.services.RoleService;
 import com.vietqradminbe.application.services.UserService;
 import com.vietqradminbe.domain.exceptions.BadRequestException;
 import com.vietqradminbe.domain.exceptions.ErrorCode;
+import com.vietqradminbe.domain.exceptions.NotFoundException;
 import com.vietqradminbe.domain.models.RefreshToken;
 import com.vietqradminbe.domain.models.User;
 import com.vietqradminbe.domain.repositories.RoleRepository;
@@ -13,6 +14,7 @@ import com.vietqradminbe.infrastructure.configuration.security.utils.JwtUtil;
 import com.vietqradminbe.infrastructure.configuration.timehelper.TimeHelperUtil;
 import com.vietqradminbe.web.dto.request.AuthenticationRequest;
 import com.vietqradminbe.web.dto.request.RefreshTokenRequest;
+import com.vietqradminbe.web.dto.request.ResetPasswordRequest;
 import com.vietqradminbe.web.dto.request.UserCreationRequest;
 import com.vietqradminbe.web.dto.response.APIResponse;
 import com.vietqradminbe.web.dto.response.RefreshTokenResponse;
@@ -114,7 +116,7 @@ public class AuthController {
         return response;
     }
 
-    @PostMapping("auth/register")
+    @PostMapping("/auth/register")
     public APIResponse<String> createUser(@RequestBody @Valid UserCreationRequest request) {
         APIResponse<String> response = new APIResponse<>();
         try {
@@ -132,6 +134,38 @@ public class AuthController {
             response.setResult("FAILED");
         } catch (Exception e) {
             logger.error(AuthController.class + ": ERROR: createUser: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            response.setCode(400);
+            response.setMessage("E1005");
+            response.setResult("FAILED");
+        }
+        return response;
+    }
+
+    @PostMapping("/auth/reset-password")
+    public APIResponse<String> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+        APIResponse<String> response = new APIResponse<>();
+        try {
+            userService.resetPasswordForUser(request);
+            logger.info(AuthController.class + ": INFO: resetPassword: " + request.toString()
+                    + " at: " + System.currentTimeMillis());
+            response.setCode(200);
+            response.setMessage("Reset successfully!");
+            response.setResult("SUCCESS");
+        } catch (BadRequestException e) {
+            logger.error(AuthController.class + ": ERROR: resetPassword: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            response.setCode(400);
+            response.setMessage("E1006");
+            response.setResult("FAILED");
+        } catch (NotFoundException e) {
+            logger.error(AuthController.class + ": ERROR: resetPassword: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            response.setCode(404);
+            response.setMessage("E1003");
+            response.setResult("FAILED");
+        }catch (Exception e) {
+            logger.error(AuthController.class + ": ERROR: resetPassword: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             response.setCode(400);
             response.setMessage("E1005");

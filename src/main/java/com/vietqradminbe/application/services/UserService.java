@@ -12,6 +12,7 @@ import com.vietqradminbe.domain.repositories.RoleRepository;
 import com.vietqradminbe.domain.repositories.UserRepository;
 import com.vietqradminbe.domain.repositories.UserRoleRepository;
 import com.vietqradminbe.infrastructure.configuration.timehelper.TimeHelperUtil;
+import com.vietqradminbe.web.dto.request.ResetPasswordRequest;
 import com.vietqradminbe.web.dto.request.UserCreationRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -46,6 +48,19 @@ public class UserService implements IUserService {
     @Override
     public User getUserByUsername(String username) {
         return userRepo.getUserByUsername(username);
+    }
+
+    @Override
+    public void resetPasswordForUser(ResetPasswordRequest request) {
+        Optional<User> user = userRepo.findById(request.getId().trim());
+        if (!user.isPresent()) {
+            throw new NotFoundException(ErrorCode.USER_NOTFOUND);
+        }
+        if (user.get().getPasswordHash().trim().equals(passwordEncoder.encode(request.getOldPassword()))) {
+            throw new BadRequestException(ErrorCode.OLD_PASSWORD_NOT_ALLOWED);
+        }
+        user.get().setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userRepo.save(user.get());
     }
 
     @Override

@@ -22,6 +22,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Query("SELECT u FROM User u JOIN RefreshToken rt ON u.id = rt.user.id WHERE rt.token = :refreshToken")
     Optional<User> getUserByRefreshToken(@Param(value = "refreshToken")String refreshToken);
 
+
 }
 
 

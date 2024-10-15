@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.Column;
+import java.io.Serializable;
 
 //khoi tao getter setter thay vi phai tao manual
 @Data
@@ -23,7 +24,7 @@ import javax.persistence.Column;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 //end khai bao access level
 
-public class UserCreationRequest {
+public class UserCreationRequest implements Serializable {
     @Size(min = 3, message = "USERNAME_INVALID")
     String username;
     @Size(min = 8, message = "PASSWORD_INVALID")

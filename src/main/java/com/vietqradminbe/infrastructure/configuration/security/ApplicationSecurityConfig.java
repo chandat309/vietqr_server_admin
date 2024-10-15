@@ -20,6 +20,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
@@ -32,13 +35,15 @@ public class ApplicationSecurityConfig {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
-    private static final String[] WHITE_LIST_URL = {"/api/v1/auth/**", "/api/v1/login/**", "/swagger-ui/**", "/swagger-ui.html"
+    private static final String[] WHITE_LIST_URL = {"/api/v1/auth/register", "/api/v1/login/**", "/swagger-ui/**", "/swagger-ui.html"
             , "/v3/api-docs/**", "/h2-console/**", "/api/v1/version/**", "/api/v1/refreshtoken/**"};
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         try {
-            httpSecurity.csrf(AbstractHttpConfigurer::disable)
+            httpSecurity
+                    .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                    .csrf(AbstractHttpConfigurer::disable)
                     .authorizeHttpRequests(requests -> {
                         RequestMatcher[] whiteListMatchers = Arrays.stream(WHITE_LIST_URL)
                                 .map(AntPathRequestMatcher::new)
@@ -47,6 +52,8 @@ public class ApplicationSecurityConfig {
                         requests.requestMatchers(whiteListMatchers).permitAll()
                                 //authorize for admin role
                                 .requestMatchers(new AntPathRequestMatcher("/api/v1/users")).hasAuthority("ADMIN_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/roles")).hasAuthority("ADMIN_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/auth/reset-password")).hasAnyAuthority("ADMIN_ROLE", "ACCOUNTANCE_ROLE", "IT_SUPPORT_ROLE")
                                 .anyRequest()
                                 .authenticated();
                     })
@@ -73,5 +80,18 @@ public class ApplicationSecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOriginPattern("*"); // Allow all origins
+        configuration.addAllowedHeader("*");        // Allow all headers
+        configuration.addAllowedMethod("*");        // Allow all HTTP methods
+        configuration.setAllowCredentials(true);    // Allow credentials (optional)
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // Apply to all routes
+        return source;
     }
 }
