@@ -1,10 +1,9 @@
 package com.vietqradminbe.web.dto.request;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+//khoi tao getter setter thay vi phai tao manual
 @Data
 //end khoi tao getter setter
 //tao constructor voi so luong tham so truyen vao la tat ca va khong can truyen tham so nao vao
@@ -16,15 +15,10 @@ import lombok.experimental.FieldDefaults;
 //VD: UserCreationRequest request = UserCreationRequest.builder().username("abc").build();
 @Builder
 //end khai bao builder
-//set mac dinh access level cho tung properties cua entity la pham vi truy cap nhu the nao
+//set mac dinh access level cho tung field cua entity la pham vi truy cap nhu the nao
 //VD: private thi dung nhu ben duoi
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AccountCreationRequest {
-    @Size(min = 3, message = "USERNAME_INVALID")
-    String username;
-    @Size(min = 8, message = "PASSWORD_INVALID")
-    @NotEmpty(message = "PASSWORD_NULL")
-    String password;
-    String role;
-    boolean available;
+//end khai bao access level
+public class RoleCreationRequest {
+    String roleName;
 }

@@ -18,6 +18,9 @@ public enum ErrorCode {
     PASSWORD_INVALID(400,"Password must at least 8 characters!"),
     PASSWORD_NULL(400,"Password cannot be null!"),
     INVALID_USERNAME_OR_PASSWORD(400,"Invalid username or password!"),
+    ROLE_NAME_EXISTED(400,"Role name existed!"),
+    ROLE_NOTFOUND(404,"Role not found!"),
+    REFRESH_TOKEN_EXPIRED(400,"Refresh token expired!"),
     ;
 
     ErrorCode(int code, String message) {

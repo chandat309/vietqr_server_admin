@@ -1,9 +1,12 @@
 package com.vietqradminbe.infrastructure.configuration.security.utils;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.vietqradminbe.web.controllers.RoleController;
+import org.apache.log4j.Logger;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +20,8 @@ import java.util.Objects;
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+    static Logger log = Logger.getLogger(RoleController.class.getName());
+
 
     public JwtAuthorizationFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserDetailsService userDetailsService) {
         super(authenticationManager);

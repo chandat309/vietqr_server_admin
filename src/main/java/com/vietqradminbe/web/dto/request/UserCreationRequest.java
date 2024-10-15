@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import javax.persistence.Column;
+
 //khoi tao getter setter thay vi phai tao manual
 @Data
 //end khoi tao getter setter
@@ -22,9 +24,11 @@ import lombok.experimental.FieldDefaults;
 //end khai bao access level
 
 public class UserCreationRequest {
-    String name;
-    String email;
+    @Size(min = 3, message = "USERNAME_INVALID")
+    String username;
     @Size(min = 8, message = "PASSWORD_INVALID")
     @NotEmpty(message = "PASSWORD_NULL")
     String password;
+    String email;
+    String roleId;
 }
