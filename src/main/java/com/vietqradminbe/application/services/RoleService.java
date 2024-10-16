@@ -45,7 +45,7 @@ public class RoleService implements IRoleService {
 
     @Override
     public void createRoleRequest(RoleCreationRequest request) {
-        List<Role> roles = roleRepository.getRolesByRoleName(request.getRoleName());
+        List<Role> roles = roleRepository.getRolesByRoleName(request.getRoleName().trim());
         if (roles.isEmpty()) {
             Role role = roleMapper.toRole(request);
             role.setRoleName(request.getRoleName().trim());

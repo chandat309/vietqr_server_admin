@@ -1,15 +1,11 @@
 package com.vietqradminbe.domain.models;
 
-import javax.persistence.*;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.GenericGenerator;
 
-import java.util.List;
-import java.util.UUID;
-
+import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Data
@@ -17,12 +13,14 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "user")
-public class User {
-
+@Table(name = "action_log")
+public class ActionLog implements Serializable {
     @Id
     @Column(name = "id")
     String id;
+
+    @Column(name = "description", nullable = false)
+    String description;
 
     @Column(name = "username", nullable = false)
     String username;
@@ -39,28 +37,14 @@ public class User {
     @Column(name = "phone_number",nullable = false)
     String phoneNumber;
 
-    @Column(name = "password_hash", nullable = false)
-    String passwordHash;
-
     @Column(name = "created_at", updatable = false, nullable = false)
     String createAt;
 
     @Column(name = "updated_at", nullable = false)
     String updateAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
+    @ManyToOne()
+    @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
-    List<UserRole> userRoles;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
-    @JsonIgnore
-    List<RefreshToken> refreshTokens;
-
-    @Column(name = "is_active", nullable = false)
-    int isActive;
-
-    @Override
-    public String toString() {
-        return "User{id=" + id + ", username='" + username + "'}"; // Avoid referencing UserRole
-    }
+    User user;
 }

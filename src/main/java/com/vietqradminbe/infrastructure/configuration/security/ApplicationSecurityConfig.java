@@ -53,6 +53,7 @@ public class ApplicationSecurityConfig {
                                 //authorize for admin role
                                 .requestMatchers(new AntPathRequestMatcher("/api/v1/users")).hasAuthority("ADMIN_ROLE")
                                 .requestMatchers(new AntPathRequestMatcher("/api/v1/roles")).hasAuthority("ADMIN_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/features")).hasAuthority("ADMIN_ROLE")
                                 .requestMatchers(new AntPathRequestMatcher("/api/v1/auth/reset-password")).hasAnyAuthority("ADMIN_ROLE", "ACCOUNTANCE_ROLE", "IT_SUPPORT_ROLE")
                                 .anyRequest()
                                 .authenticated();

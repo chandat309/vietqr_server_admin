@@ -15,8 +15,11 @@ public class UserLoginResponse {
     String id;
     String username;
     String email;
+    String firstName;
+    String lastName;
+    String phoneNumber;
     List<String> roles;
-    Boolean isActive;
+    int isActive;
     String tokenType;
     String accessToken;
     String refreshToken;

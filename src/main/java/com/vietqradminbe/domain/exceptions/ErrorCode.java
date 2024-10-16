@@ -23,6 +23,7 @@ public enum ErrorCode {
     REFRESH_TOKEN_EXPIRED(400,"Refresh token expired!"),
     TOKEN_EXPIRED(400,"Token expired!"),
     OLD_PASSWORD_NOT_ALLOWED(400,"Old password not allowed!"),
+    FEATURE_NAME_EXISTED(400,"Feature name existed!"),
     ;
 
     ErrorCode(int code, String message) {

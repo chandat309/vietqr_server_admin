@@ -78,7 +78,10 @@ public class UserService implements IUserService {
         user.setUpdateAt(" ");
         user.setId(UUID.randomUUID().toString());
         user.setEmail(" ");
-        user.setIsActive(false);
+        user.setIsActive(0);
+        user.setFirstname("");
+        user.setLastname("");
+        user.setPhoneNumber("");
         User userAdded = userRepo.save(user);
 
         //find role
