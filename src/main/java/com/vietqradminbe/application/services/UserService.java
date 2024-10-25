@@ -64,7 +64,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(transactionManager = "adminTransactionManager")
     public User createUserRequest(UserCreationRequest request) {
         request.setUsername(request.getUsername().trim());
         request.setPassword(request.getPassword().trim());
