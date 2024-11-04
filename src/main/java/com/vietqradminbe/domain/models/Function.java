@@ -26,16 +26,15 @@ public class Function implements Serializable {
     @Column(name = "description", nullable = false)
     String description;
 
+    @Column(name = "type", nullable = false)
+    String type;
+
     @Column(name = "created_at", updatable = false, nullable = false)
     String createAt;
-
-    @Column(name = "update_at", nullable = false)
-    String updateAt;
 
     @Column(name = "is_available", nullable = false)
     int isAvailable;
 
-    @OneToMany(mappedBy = "feature", cascade = CascadeType.PERSIST)
-    @JsonIgnore
-    List<UserFeature> userFeatures;
+    @Column(name = "group_function_id", nullable = false)
+    String groupFunctionId;
 }

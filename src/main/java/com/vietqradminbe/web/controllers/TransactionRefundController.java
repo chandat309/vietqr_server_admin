@@ -54,6 +54,9 @@ public class TransactionRefundController {
             // Extract Bearer token from the Authorization header
             String authorizationHeader = currentRequest.getHeader("Authorization");
             String token = null;
+            List<TransactionRefundAdminDetailDTO> trans = transactionRefundService.getTransactionRefundAdminDetail(referenceNumber);
+
+
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 token = authorizationHeader.substring(7);  // Remove "Bearer " prefix
 
@@ -70,11 +73,13 @@ public class TransactionRefundController {
                 activityUserLog.setPhoneNumber(user.getPhoneNumber());
                 activityUserLog.setTimeLog(TimeHelperUtil.getCurrentTime());
                 activityUserLog.setUser(user);
+                activityUserLog.setActionJson(trans.toString());
+                activityUserLog.setGroupFunctionId("71db4741-8f18-4f7c-ba5b-cdbeaab8b45e");
+                activityUserLog.setFunctionId("eafb7d72-0d11-47da-a9cb-6fd0797f8029");
                 activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just get detail transaction refund " + TimeHelperUtil.getCurrentTime());
                 activityUserLogService.createActivityUserLog(activityUserLog);
             }
 
-            List<TransactionRefundAdminDetailDTO> trans = transactionRefundService.getTransactionRefundAdminDetail(referenceNumber);
             logger.info(TransactionController.class + ": INFO: trans: " + trans.toString()
                     + " at: " + System.currentTimeMillis());
             response.setCode(200);

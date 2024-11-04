@@ -55,6 +55,9 @@ public class TransactionReceiveLogController {
             // Extract Bearer token from the Authorization header
             String authorizationHeader = currentRequest.getHeader("Authorization");
             String token = null;
+            List<TransactionReceiveLogDTO> trans = transactionReceiveLogService.getTransactionLogsByTransId(transactionId);
+
+
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 token = authorizationHeader.substring(7);  // Remove "Bearer " prefix
 
@@ -71,11 +74,13 @@ public class TransactionReceiveLogController {
                 activityUserLog.setPhoneNumber(user.getPhoneNumber());
                 activityUserLog.setTimeLog(TimeHelperUtil.getCurrentTime());
                 activityUserLog.setUser(user);
+                activityUserLog.setActionJson(trans.toString());
+                activityUserLog.setGroupFunctionId("2d9a75a7-3ae7-41f6-b408-6e7bd2bfc23e");
+                activityUserLog.setFunctionId("8761b3fa-edd3-47ff-b820-6ca36f22815b");
                 activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just get all tran logs at " + TimeHelperUtil.getCurrentTime());
                 activityUserLogService.createActivityUserLog(activityUserLog);
             }
 
-            List<TransactionReceiveLogDTO> trans = transactionReceiveLogService.getTransactionLogsByTransId(transactionId);
             logger.info(TransactionController.class + ": INFO: trans: " + trans.toString()
                     + " at: " + System.currentTimeMillis());
             response.setCode(200);

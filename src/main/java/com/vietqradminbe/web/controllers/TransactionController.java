@@ -53,6 +53,9 @@ public class TransactionController {
             // Extract Bearer token from the Authorization header
             String authorizationHeader = currentRequest.getHeader("Authorization");
             String token = null;
+            TransactionReceivePaginationResponseDTO trans = transactionService.getTransactionsWithPaginationAllFilter(page, size);
+
+
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 token = authorizationHeader.substring(7);  // Remove "Bearer " prefix
 
@@ -69,11 +72,13 @@ public class TransactionController {
                 activityUserLog.setPhoneNumber(user.getPhoneNumber());
                 activityUserLog.setTimeLog(TimeHelperUtil.getCurrentTime());
                 activityUserLog.setUser(user);
+                activityUserLog.setActionJson(trans.toString());
+                activityUserLog.setGroupFunctionId("6fcdc4d1-f3f7-4862-bdc7-bfef31194fb6");
+                activityUserLog.setFunctionId("2e4c4a4c-3fd6-4231-b780-a0865490a8e0");
                 activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just get all trans at " + TimeHelperUtil.getCurrentTime());
                 activityUserLogService.createActivityUserLog(activityUserLog);
             }
 
-            TransactionReceivePaginationResponseDTO trans = transactionService.getTransactionsWithPaginationAllFilter(page, size);
             logger.info(TransactionController.class + ": INFO: trans: " + trans.toString()
                     + " at: " + System.currentTimeMillis());
             response.setCode(200);
@@ -114,6 +119,9 @@ public class TransactionController {
             // Extract Bearer token from the Authorization header
             String authorizationHeader = currentRequest.getHeader("Authorization");
             String token = null;
+            TransactionReceivePaginationResponseDTO transResponse = transactionService.getTransactionsWithPagination(from, to, bankAccount,
+                    referenceNumber, orderId, terminalCode, subCode, transStatus, page, size);
+
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 token = authorizationHeader.substring(7);  // Remove "Bearer " prefix
 
@@ -130,12 +138,14 @@ public class TransactionController {
                 activityUserLog.setPhoneNumber(user.getPhoneNumber());
                 activityUserLog.setTimeLog(TimeHelperUtil.getCurrentTime());
                 activityUserLog.setUser(user);
+                activityUserLog.setActionJson(transResponse.toString());
+                activityUserLog.setGroupFunctionId("6fcdc4d1-f3f7-4862-bdc7-bfef31194fb6");
+                activityUserLog.setFunctionId("2e4c4a4c-3fd6-4231-b780-a0865490a8e0");
                 activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just get all users at " + TimeHelperUtil.getCurrentTime());
                 activityUserLogService.createActivityUserLog(activityUserLog);
             }
 
-            TransactionReceivePaginationResponseDTO transResponse = transactionService.getTransactionsWithPagination(from, to, bankAccount,
-                    referenceNumber, orderId, terminalCode, subCode, transStatus, page, size);
+
             logger.info(TransactionController.class + ": INFO: trans: " + transResponse.toString()
                     + " at: " + System.currentTimeMillis());
             response.setCode(200);
@@ -166,6 +176,9 @@ public class TransactionController {
             // Extract Bearer token from the Authorization header
             String authorizationHeader = currentRequest.getHeader("Authorization");
             String token = null;
+            TransactionReceivePaginationResponseDTO transResponse = transactionService.getTransactionsWithPaginationByOption(filterTransactionRequest);
+
+
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 token = authorizationHeader.substring(7);  // Remove "Bearer " prefix
 
@@ -182,11 +195,13 @@ public class TransactionController {
                 activityUserLog.setPhoneNumber(user.getPhoneNumber());
                 activityUserLog.setTimeLog(TimeHelperUtil.getCurrentTime());
                 activityUserLog.setUser(user);
+                activityUserLog.setActionJson(transResponse.toString());
+                activityUserLog.setGroupFunctionId("6fcdc4d1-f3f7-4862-bdc7-bfef31194fb6");
+                activityUserLog.setFunctionId("2e4c4a4c-3fd6-4231-b780-a0865490a8e0");
                 activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just get all users at " + TimeHelperUtil.getCurrentTime());
                 activityUserLogService.createActivityUserLog(activityUserLog);
             }
 
-            TransactionReceivePaginationResponseDTO transResponse = transactionService.getTransactionsWithPaginationByOption(filterTransactionRequest);
             logger.info(TransactionController.class + ": INFO: trans: " + transResponse.toString()
                     + " at: " + System.currentTimeMillis());
             response.setCode(200);
@@ -215,6 +230,9 @@ public class TransactionController {
             // Extract Bearer token from the Authorization header
             String authorizationHeader = currentRequest.getHeader("Authorization");
             String token = null;
+            TransReceiveAdminDetailDTO tran = transactionService.getDetailTransReceiveAdmin(id);
+
+
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 token = authorizationHeader.substring(7);  // Remove "Bearer " prefix
 
@@ -231,11 +249,13 @@ public class TransactionController {
                 activityUserLog.setPhoneNumber(user.getPhoneNumber());
                 activityUserLog.setTimeLog(TimeHelperUtil.getCurrentTime());
                 activityUserLog.setUser(user);
+                activityUserLog.setActionJson(tran.toString());
+                activityUserLog.setGroupFunctionId("6fcdc4d1-f3f7-4862-bdc7-bfef31194fb6");
+                activityUserLog.setFunctionId("2e5ec391-b0ed-412e-a928-09dcf578ccda");
                 activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just get detail tran at " + TimeHelperUtil.getCurrentTime());
                 activityUserLogService.createActivityUserLog(activityUserLog);
             }
 
-            TransReceiveAdminDetailDTO tran = transactionService.getDetailTransReceiveAdmin(id);
             logger.info(TransactionController.class + ": INFO: tran: " + tran.toString()
                     + " at: " + System.currentTimeMillis());
             response.setCode(200);

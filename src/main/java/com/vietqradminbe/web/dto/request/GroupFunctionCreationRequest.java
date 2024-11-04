@@ -3,6 +3,7 @@ package com.vietqradminbe.web.dto.request;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import javax.persistence.Column;
 import java.io.Serializable;
 
 //khoi tao getter setter thay vi phai tao manual
@@ -20,8 +21,7 @@ import java.io.Serializable;
 //set mac dinh access level cho tung field cua entity la pham vi truy cap nhu the nao
 //VD: private thi dung nhu ben duoi
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class FunctionCreationRequest implements Serializable {
-    String featureName;
+public class GroupFunctionCreationRequest implements Serializable {
+    String groupName;
     String description;
-    String groupFunctionId;
 }

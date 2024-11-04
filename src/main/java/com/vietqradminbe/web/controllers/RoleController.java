@@ -35,8 +35,8 @@ public class RoleController {
     static Logger logger = Logger.getLogger(RoleController.class.getName());
     RoleService roleService;
     UserService userService;
-    private final JwtUtil jwtUtil;
-    private final ActivityUserLogService activityUserLogService;
+    JwtUtil jwtUtil;
+    ActivityUserLogService activityUserLogService;
 
     @PostMapping("roles")
     @Transactional
@@ -66,6 +66,9 @@ public class RoleController {
                 activityUserLog.setPhoneNumber(user.getPhoneNumber());
                 activityUserLog.setTimeLog(TimeHelperUtil.getCurrentTime());
                 activityUserLog.setUser(user);
+                activityUserLog.setActionJson("");
+                activityUserLog.setGroupFunctionId("4f198738-5c87-4409-9486-291a72e134cc");
+                activityUserLog.setFunctionId("a3ed0e21-20b6-4b37-8319-8ae713da333e");
                 activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just create role at " + TimeHelperUtil.getCurrentTime());
                 activityUserLogService.createActivityUserLog(activityUserLog);
             }

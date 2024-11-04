@@ -51,6 +51,9 @@ public class UserController {
             // Extract Bearer token from the Authorization header
             String authorizationHeader = currentRequest.getHeader("Authorization");
             String token = null;
+            List<User> users = userService.getAllUsers();
+
+
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 token = authorizationHeader.substring(7);  // Remove "Bearer " prefix
 
@@ -67,10 +70,12 @@ public class UserController {
                 activityUserLog.setPhoneNumber(user.getPhoneNumber());
                 activityUserLog.setTimeLog(TimeHelperUtil.getCurrentTime());
                 activityUserLog.setUser(user);
+                activityUserLog.setActionJson(users.toString());
+                activityUserLog.setGroupFunctionId("7303b0ff-adc5-4e34-aa8a-c019760e3522");
+                activityUserLog.setFunctionId("5d85f849-4b32-4880-b62b-f6e974d6bd44");
                 activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just get all users at " + TimeHelperUtil.getCurrentTime());
                 activityUserLogService.createActivityUserLog(activityUserLog);
             }
-            List<User> users = userService.getAllUsers();
             logger.info(UserController.class + ": INFO: getUsers: " + users.toString()
                     + " at: " + System.currentTimeMillis());
             response.setCode(200);

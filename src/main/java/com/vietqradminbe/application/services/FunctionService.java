@@ -14,7 +14,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,18 +32,16 @@ public class FunctionService implements IFunctionService {
             Function function = functionMapper.toFunction(request);
             function.setFunctionName(request.getFeatureName().trim());
             function.setCreateAt(TimeHelperUtil.getCurrentTime());
-            function.setUpdateAt("");
             function.setId(UUID.randomUUID().toString());
             function.setDescription(request.getDescription().trim());
             function.setIsAvailable(0);
             functionRepository.save(function);
-        } else throw new BadRequestException(ErrorCode.ROLE_NAME_EXISTED);
+        } else throw new BadRequestException(ErrorCode.FUNCTION_NAME_EXISTED);
     }
 
     @Override
     public List<Function> getAllFunctions() {
-        List<Function> features = functionRepository.findAll();
-        return features;
+        return functionRepository.findAll();
     }
 
 }

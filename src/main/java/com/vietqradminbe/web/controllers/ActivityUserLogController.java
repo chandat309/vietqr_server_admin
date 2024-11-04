@@ -52,6 +52,8 @@ public class ActivityUserLogController {
             // Extract Bearer token from the Authorization header
             String authorizationHeader = currentRequest.getHeader("Authorization");
             String token = null;
+            PagingDTO<ActivityUserLogListDTO> actionLogs = activityUserLogRepository.getAllActivityUserLogs(page, size);
+
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 token = authorizationHeader.substring(7);  // Remove "Bearer " prefix
 
@@ -68,11 +70,13 @@ public class ActivityUserLogController {
                 activityUserLog.setPhoneNumber(user.getPhoneNumber());
                 activityUserLog.setTimeLog(TimeHelperUtil.getCurrentTime());
                 activityUserLog.setUser(user);
-                activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just get all action logs at " + TimeHelperUtil.getCurrentTime());
+                activityUserLog.setActionJson(actionLogs.toString());
+                activityUserLog.setGroupFunctionId("50eca1c0-34c6-425a-a8b5-93bf38e8d21b");
+                activityUserLog.setFunctionId("222d24fc-88a0-4b99-a621-1d8cad1cbdf9");
+                activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just get all activity logs at " + TimeHelperUtil.getCurrentTime());
                 activityUserLogRepository.createActivityUserLog(activityUserLog);
             }
 
-            PagingDTO<ActivityUserLogListDTO> actionLogs = activityUserLogRepository.getAllActivityUserLogs(page, size);
             logger.info(ActivityUserLogController.class + ": INFO: logs: " + actionLogs.toString()
                     + " at: " + System.currentTimeMillis());
             response.setCode(200);

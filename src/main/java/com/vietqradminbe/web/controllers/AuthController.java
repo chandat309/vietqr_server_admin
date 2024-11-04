@@ -184,6 +184,9 @@ public class AuthController {
                 activityUserLog.setPhoneNumber(user.getPhoneNumber());
                 activityUserLog.setTimeLog(TimeHelperUtil.getCurrentTime());
                 activityUserLog.setUser(user);
+                activityUserLog.setActionJson("");
+                activityUserLog.setGroupFunctionId("7303b0ff-adc5-4e34-aa8a-c019760e3522");
+                activityUserLog.setFunctionId("f11f9ab4-4877-4069-8851-11e11d9ed53b");
                 activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just reset password at " + TimeHelperUtil.getCurrentTime());
                 activityUserLogService.createActivityUserLog(activityUserLog);
             }

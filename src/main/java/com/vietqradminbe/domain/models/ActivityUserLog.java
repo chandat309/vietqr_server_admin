@@ -40,8 +40,17 @@ public class ActivityUserLog implements Serializable {
     @Column(name = "time_log", updatable = false, nullable = false)
     String timeLog;
 
+    @Column(name = "action_json", nullable = false)
+    String actionJson;
+
     @ManyToOne()
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
     User user;
+
+    @Column(name = "function_id")
+    String functionId;
+
+    @Column(name = "group_function_id")
+    String groupFunctionId;
 }
