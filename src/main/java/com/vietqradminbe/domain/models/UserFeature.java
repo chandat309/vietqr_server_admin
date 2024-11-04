@@ -27,13 +27,13 @@ public class UserFeature implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "feature_id", nullable = false)
     @JsonIgnore
-    Feature feature;
+    Function feature;
 
     @Column(name = "is_enabled", nullable = false)
     int isEnabled;
 
     @Override
     public String toString() {
-        return "UserFeature{id=" + id + ", featureName='" + feature.getFeatureName() + "'}";
+        return "UserFeature{id=" + id + ", featureName='" + feature.getFunctionName() + "'}";
     }
 }

@@ -9,6 +9,8 @@ import com.vietqradminbe.domain.models.User;
 import com.vietqradminbe.infrastructure.configuration.security.utils.JwtUtil;
 import com.vietqradminbe.infrastructure.configuration.timehelper.TimeHelperUtil;
 import com.vietqradminbe.web.dto.response.APIResponse;
+import com.vietqradminbe.web.dto.response.PagingDTO;
+import com.vietqradminbe.web.dto.response.interfaces.ActivityUserLogListDTO;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,34 +18,33 @@ import lombok.experimental.FieldDefaults;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UserController {
+public class ActivityUserLogController {
     static Logger logger = Logger.getLogger(UserController.class);
 
     UserService userService;
     JwtUtil jwtUtil;
-    ActivityUserLogService activityUserLogService;
+    ActivityUserLogService activityUserLogRepository;
 
-    @GetMapping("/version")
-    public String getJavaVersion() {
-        return System.getProperty("java.version");
-    }
-
-
-    @GetMapping("/users")
-    public ResponseEntity<APIResponse<List<User>>> getUsers() {
-        APIResponse<List<User>> response = new APIResponse<>();
+    @GetMapping("/logs")
+    public ResponseEntity<APIResponse<PagingDTO<ActivityUserLogListDTO>>> getLogs(
+            @RequestParam(value = "page") int page,
+            @RequestParam(value = "size") int size
+    ) {
+        APIResponse<PagingDTO<ActivityUserLogListDTO>> response = new APIResponse<>();
         try {
             HttpServletRequest currentRequest = ((ServletRequestAttributes) RequestContextHolder
                     .getRequestAttributes()).getRequest();
@@ -67,20 +68,21 @@ public class UserController {
                 activityUserLog.setPhoneNumber(user.getPhoneNumber());
                 activityUserLog.setTimeLog(TimeHelperUtil.getCurrentTime());
                 activityUserLog.setUser(user);
-                activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just get all users at " + TimeHelperUtil.getCurrentTime());
-                activityUserLogService.createActivityUserLog(activityUserLog);
+                activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just get all action logs at " + TimeHelperUtil.getCurrentTime());
+                activityUserLogRepository.createActivityUserLog(activityUserLog);
             }
-            List<User> users = userService.getAllUsers();
-            logger.info(UserController.class + ": INFO: getUsers: " + users.toString()
+
+            PagingDTO<ActivityUserLogListDTO> actionLogs = activityUserLogRepository.getAllActivityUserLogs(page, size);
+            logger.info(ActivityUserLogController.class + ": INFO: logs: " + actionLogs.toString()
                     + " at: " + System.currentTimeMillis());
             response.setCode(200);
             response.setMessage("Get successfully!");
-            response.setResult(users);
+            response.setResult(actionLogs);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (ExpiredJwtException e) {
             throw new BadRequestException(ErrorCode.TOKEN_EXPIRED);
         } catch (Exception e) {
-            logger.error(UserController.class + ": ERROR: getUser: " + e.getMessage()
+            logger.error(ActivityUserLogController.class + ": ERROR: logs: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             response.setCode(500);
             response.setMessage("E1005");

@@ -6,9 +6,11 @@ import com.vietqradminbe.domain.exceptions.BadRequestException;
 import com.vietqradminbe.domain.exceptions.ErrorCode;
 import com.vietqradminbe.domain.models.ActivityUserLog;
 import com.vietqradminbe.domain.models.User;
+import com.vietqradminbe.infrastructure.adapters.database.mysql.transaction.services.TransactionRefundService;
 import com.vietqradminbe.infrastructure.configuration.security.utils.JwtUtil;
 import com.vietqradminbe.infrastructure.configuration.timehelper.TimeHelperUtil;
 import com.vietqradminbe.web.dto.response.APIResponse;
+import com.vietqradminbe.web.dto.response.interfaces.TransactionRefundAdminDetailDTO;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +18,10 @@ import lombok.experimental.FieldDefaults;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -28,22 +33,20 @@ import java.util.UUID;
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UserController {
-    static Logger logger = Logger.getLogger(UserController.class);
+public class TransactionRefundController {
 
-    UserService userService;
+    static Logger logger = Logger.getLogger(TransactionRefundController.class);
+
+    TransactionRefundService transactionRefundService;
     JwtUtil jwtUtil;
+    UserService userService;
     ActivityUserLogService activityUserLogService;
 
-    @GetMapping("/version")
-    public String getJavaVersion() {
-        return System.getProperty("java.version");
-    }
-
-
-    @GetMapping("/users")
-    public ResponseEntity<APIResponse<List<User>>> getUsers() {
-        APIResponse<List<User>> response = new APIResponse<>();
+    @GetMapping("/transactions-refund")
+    public ResponseEntity<APIResponse<List<TransactionRefundAdminDetailDTO>>> getTransactionRefundAdminDetail(
+            @RequestParam(value = "referenceNumber") String referenceNumber
+    ) {
+        APIResponse<List<TransactionRefundAdminDetailDTO>> response = new APIResponse<>();
         try {
             HttpServletRequest currentRequest = ((ServletRequestAttributes) RequestContextHolder
                     .getRequestAttributes()).getRequest();
@@ -67,20 +70,21 @@ public class UserController {
                 activityUserLog.setPhoneNumber(user.getPhoneNumber());
                 activityUserLog.setTimeLog(TimeHelperUtil.getCurrentTime());
                 activityUserLog.setUser(user);
-                activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just get all users at " + TimeHelperUtil.getCurrentTime());
+                activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just get detail transaction refund " + TimeHelperUtil.getCurrentTime());
                 activityUserLogService.createActivityUserLog(activityUserLog);
             }
-            List<User> users = userService.getAllUsers();
-            logger.info(UserController.class + ": INFO: getUsers: " + users.toString()
+
+            List<TransactionRefundAdminDetailDTO> trans = transactionRefundService.getTransactionRefundAdminDetail(referenceNumber);
+            logger.info(TransactionController.class + ": INFO: trans: " + trans.toString()
                     + " at: " + System.currentTimeMillis());
             response.setCode(200);
             response.setMessage("Get successfully!");
-            response.setResult(users);
+            response.setResult(trans);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (ExpiredJwtException e) {
             throw new BadRequestException(ErrorCode.TOKEN_EXPIRED);
         } catch (Exception e) {
-            logger.error(UserController.class + ": ERROR: getUser: " + e.getMessage()
+            logger.error(TransactionController.class + ": ERROR: trans: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             response.setCode(500);
             response.setMessage("E1005");

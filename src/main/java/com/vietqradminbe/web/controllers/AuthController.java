@@ -1,13 +1,13 @@
 package com.vietqradminbe.web.controllers;
 
 
-import com.vietqradminbe.application.services.ActionLogService;
+import com.vietqradminbe.application.services.ActivityUserLogService;
 import com.vietqradminbe.application.services.RefreshTokenService;
 import com.vietqradminbe.application.services.RoleService;
 import com.vietqradminbe.application.services.UserService;
 import com.vietqradminbe.domain.exceptions.BadRequestException;
 import com.vietqradminbe.domain.exceptions.NotFoundException;
-import com.vietqradminbe.domain.models.ActionLog;
+import com.vietqradminbe.domain.models.ActivityUserLog;
 import com.vietqradminbe.domain.models.RefreshToken;
 import com.vietqradminbe.domain.models.User;
 import com.vietqradminbe.infrastructure.configuration.security.utils.JwtUtil;
@@ -25,6 +25,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import org.apache.log4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -55,11 +57,11 @@ public class AuthController {
     UserService userService;
     RefreshTokenService refreshTokenService;
     RoleService roleService;
-    ActionLogService actionLogService;
+    ActivityUserLogService activityUserLogService;
     static Logger logger = Logger.getLogger(AuthController.class.getName());
 
     @PostMapping("/login")
-    public APIResponse<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws BadCredentialsException {
+    public ResponseEntity<APIResponse<?>> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws BadCredentialsException {
         APIResponse<UserLoginResponse> response = new APIResponse<>();
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername().trim(), authenticationRequest.getPassword().trim()));
@@ -92,15 +94,16 @@ public class AuthController {
             response.setCode(200);
             response.setMessage("Success");
             response.setResult(userLoginResponse);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (BadCredentialsException badCredentialsException) {
             response.setCode(400);
             response.setMessage("E1002");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
-        return response;
     }
 
     @PostMapping("/refreshtoken")
-    public APIResponse<RefreshTokenResponse> refreshtoken(@Valid @RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<APIResponse<RefreshTokenResponse>> refreshtoken(@Valid @RequestBody RefreshTokenRequest request) {
 
         APIResponse<RefreshTokenResponse> response = new APIResponse<>();
 
@@ -109,7 +112,7 @@ public class AuthController {
         if (userExisted == null) {
             response.setCode(404);
             response.setMessage("E1003");
-            return response;
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         final UserDetails userDetails = userDetailsService.loadUserByUsername(userExisted.getUsername());
 
@@ -123,11 +126,11 @@ public class AuthController {
         response.setCode(200);
         response.setMessage("Success");
         response.setResult(refreshTokenResponse);
-        return response;
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/auth/register")
-    public APIResponse<String> createUser(@RequestBody @Valid UserCreationRequest request) {
+    public ResponseEntity<APIResponse<String>> createUser(@RequestBody @Valid UserCreationRequest request) {
         APIResponse<String> response = new APIResponse<>();
         try {
             User user = userService.createUserRequest(request);
@@ -136,25 +139,27 @@ public class AuthController {
             response.setCode(200);
             response.setMessage("Create successfully!");
             response.setResult("SUCCESS");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (BadRequestException e) {
             logger.error(AuthController.class + ": ERROR: createUser: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             response.setCode(400);
             response.setMessage("E1001");
             response.setResult("FAILED");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
             logger.error(AuthController.class + ": ERROR: createUser: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
-            response.setCode(400);
+            response.setCode(500);
             response.setMessage("E1005");
             response.setResult("FAILED");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        return response;
     }
 
     @PostMapping("/auth/reset-password")
     @Transactional
-    public APIResponse<String> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+    public ResponseEntity<APIResponse<String>> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
         APIResponse<String> response = new APIResponse<>();
         try {
             HttpServletRequest currentRequest = ((ServletRequestAttributes) RequestContextHolder
@@ -170,18 +175,17 @@ public class AuthController {
                 String username = jwtUtil.extractUsernameFromToken(token.replace("Bearer ", ""));
                 User user = userService.getUserByUsername(username);
 
-                ActionLog actionLog = new ActionLog();
-                actionLog.setUsername(username);
-                actionLog.setId(UUID.randomUUID().toString());
-                actionLog.setEmail(user.getEmail());
-                actionLog.setFirstname(user.getFirstname());
-                actionLog.setLastname(user.getLastname());
-                actionLog.setPhoneNumber(user.getPhoneNumber());
-                actionLog.setCreateAt(TimeHelperUtil.getCurrentTime());
-                actionLog.setUpdateAt("");
-                actionLog.setUser(user);
-                actionLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just reset password at " + TimeHelperUtil.getCurrentTime());
-                actionLogService.createActionLog(actionLog);
+                ActivityUserLog activityUserLog = new ActivityUserLog();
+                activityUserLog.setUsername(username);
+                activityUserLog.setId(UUID.randomUUID().toString());
+                activityUserLog.setEmail(user.getEmail());
+                activityUserLog.setFirstname(user.getFirstname());
+                activityUserLog.setLastname(user.getLastname());
+                activityUserLog.setPhoneNumber(user.getPhoneNumber());
+                activityUserLog.setTimeLog(TimeHelperUtil.getCurrentTime());
+                activityUserLog.setUser(user);
+                activityUserLog.setDescription("User :" + user.getUsername() + " " + user.getEmail() + " " + user.getFirstname() + " " + user.getLastname() + " " + user.getPhoneNumber() + " have just reset password at " + TimeHelperUtil.getCurrentTime());
+                activityUserLogService.createActivityUserLog(activityUserLog);
             }
 
 
@@ -191,25 +195,28 @@ public class AuthController {
             response.setCode(200);
             response.setMessage("Reset successfully!");
             response.setResult("SUCCESS");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (BadRequestException e) {
             logger.error(AuthController.class + ": ERROR: resetPassword: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             response.setCode(400);
-            response.setMessage("E1006");
+            response.setMessage("E1007");
             response.setResult("FAILED");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (NotFoundException e) {
             logger.error(AuthController.class + ": ERROR: resetPassword: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             response.setCode(404);
             response.setMessage("E1003");
             response.setResult("FAILED");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             logger.error(AuthController.class + ": ERROR: resetPassword: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
-            response.setCode(400);
+            response.setCode(500);
             response.setMessage("E1005");
             response.setResult("FAILED");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        return response;
     }
 }

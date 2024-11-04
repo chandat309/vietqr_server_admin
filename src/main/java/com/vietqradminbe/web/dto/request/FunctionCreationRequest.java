@@ -20,7 +20,7 @@ import java.io.Serializable;
 //set mac dinh access level cho tung field cua entity la pham vi truy cap nhu the nao
 //VD: private thi dung nhu ben duoi
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class FeatureCreationRequest implements Serializable {
+public class FunctionCreationRequest implements Serializable {
     String featureName;
     String description;
 }

@@ -1,10 +1,8 @@
 package com.vietqradminbe.infrastructure.configuration.security;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.vietqradminbe.domain.models.User;
 import com.vietqradminbe.domain.repositories.RoleRepository;
 import com.vietqradminbe.domain.repositories.UserRepository;
-import org.hibernate.Hibernate;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

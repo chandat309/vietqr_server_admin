@@ -3,6 +3,7 @@ package com.vietqradminbe.infrastructure.adapters.database.mysql.transaction.ser
 
 import com.vietqradminbe.web.dto.request.RequestFilterTransactionRequest;
 import com.vietqradminbe.web.dto.response.TransactionReceivePaginationResponseDTO;
+import com.vietqradminbe.web.dto.response.interfaces.TransReceiveAdminDetailDTO;
 import com.vietqradminbe.web.dto.response.interfaces.TransactionReceiveAdminListDTO;
 
 import java.util.List;
@@ -20,4 +21,6 @@ public interface ITransactionService {
     public TransactionReceivePaginationResponseDTO getTransactionsWithPaginationAllFilter(int offset, int size);
 
     public TransactionReceivePaginationResponseDTO getTransactionsWithPaginationByOption(RequestFilterTransactionRequest request);
+
+    public TransReceiveAdminDetailDTO getDetailTransReceiveAdmin(String transactionId);
 }

@@ -2,7 +2,7 @@ package com.vietqradminbe.web.dto.response.interfaces;
 
 import org.springframework.beans.factory.annotation.Value;
 
-public interface ActionLogListDTO {
+public interface ActivityUserLogListDTO {
 
     @Value("#{target.id ?: ''}")
     String getId();
@@ -25,9 +25,7 @@ public interface ActionLogListDTO {
     @Value("#{target.phoneNumber ?: ''}")
     String getPhoneNumber();
 
-    @Value("#{target.createAt ?: ''}")
-    String getCreateAt();
+    @Value("#{target.timeLog ?: ''}")
+    String getTimeLog();
 
-    @Value("#{target.updateAt ?: ''}")
-    String getUpdateAt();
 }

@@ -1,6 +1,5 @@
 package com.vietqradminbe.infrastructure.configuration.security.utils;
 
-import com.vietqradminbe.domain.models.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

@@ -1,7 +1,7 @@
 package com.vietqradminbe.infrastructure.adapters.database.mysql.transaction.repositories;
 
 import com.vietqradminbe.infrastructure.adapters.database.mysql.transaction.entities.TransactionReceiveEntity;
-import com.vietqradminbe.web.dto.response.TransactionReceivePaginationResponseDTO;
+import com.vietqradminbe.web.dto.response.interfaces.TransReceiveAdminDetailDTO;
 import com.vietqradminbe.web.dto.response.interfaces.TransactionReceiveAdminListDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -75,52 +75,42 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
     );
 
     //case 1: filter all - default filter
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.status != 0" +
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationAllFilter(@Param("offset") int offset,
                                                                                 @Param("limit") int size);
 
-    @Query(value = "SELECT count(a.id) FROM transaction_receive a ", nativeQuery = true)
+    @Query(value = "SELECT count(a.id) FROM transaction_receive a WHERE a.status != 0", nativeQuery = true)
     int getTotalTransactionsWithPaginationAllFilter();
     //end case 1
 
     //case 2: filter from to - time create filter
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.timeCreated >= :from AND temp.timeCreated <= :to"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.`time` >= :from AND a.`time` <= :to AND a.status != 0"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByTimeCreate(
                                                                                 @Param("from") Long from,
                                                                                 @Param("to") Long to,
@@ -128,7 +118,7 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
                                                                                 @Param("limit") int size);
 
     @Query(value = "SELECT count(a.id) FROM transaction_receive a " +
-            "WHERE a.time >= :from AND a.time <= :to", nativeQuery = true)
+            "WHERE a.time >= :from AND a.time <= :to AND a.status != 0", nativeQuery = true)
     int getTotalTransactionsWithPaginationFilterByTimeCreate(@Param("from") Long from,
                                                              @Param("to") Long to);
     //end case 2
@@ -168,215 +158,173 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
     //end case 3
 
     //case 4: filter group transaction - group transaction filter - bankAccount
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.bankAccount LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.bank_account LIKE CONCAT('%', :value, '%') AND a.status != 0"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByBankAccount(
             @Param("value") String value,
             @Param("offset") int offset,
             @Param("limit") int size);
 
     @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a" +
-            "                        WHERE a.bank_account LIKE CONCAT('%', :value, '%')", nativeQuery = true)
+            "                        WHERE a.bank_account LIKE CONCAT('%', :value, '%') AND a.status != 0" , nativeQuery = true)
     int getTotalTransactionsWithPaginationFilterByBankAccount(@Param("value") String value);
     //end case 4
 
 
     //case 5: filter group transaction - group transaction filter - referenceNumber
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.referenceNumber LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.reference_number LIKE CONCAT('%', :value, '%') AND a.status != 0"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByReferenceNumber(
             @Param("value") String value,
             @Param("offset") int offset,
             @Param("limit") int size);
 
     @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a" +
-            "                        WHERE a.reference_number LIKE CONCAT('%', :value, '%')", nativeQuery = true)
+            "                        WHERE a.reference_number LIKE CONCAT('%', :value, '%') AND a.status != 0", nativeQuery = true)
     int getTotalTransactionsWithPaginationFilterByReferenceNumber(@Param("value") String value);
     //end case 5
 
 
     //case 6: filter group transaction - group transaction filter - orderId
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.orderId LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.order_id LIKE CONCAT('%', :value, '%') AND a.status != 0"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByOrderId(
             @Param("value") String value,
             @Param("offset") int offset,
             @Param("limit") int size);
 
     @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a" +
-            "                        WHERE a.order_id LIKE CONCAT('%', :value, '%')", nativeQuery = true)
+            "                        WHERE a.order_id LIKE CONCAT('%', :value, '%') AND a.status != 0", nativeQuery = true)
     int getTotalTransactionsWithPaginationFilterByOrderId(@Param("value") String value);
     //end case 6
 
     //case 7: filter group transaction - group transaction filter - terminalCode
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType" +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.terminalCode LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.terminal_code LIKE CONCAT('%', :value, '%') AND a.status != 0"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByTerminalCode(
             @Param("value") String value,
             @Param("offset") int offset,
             @Param("limit") int size);
 
     @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a" +
-            "                        WHERE a.terminal_code LIKE CONCAT('%', :value, '%')", nativeQuery = true)
+            "                        WHERE a.terminal_code LIKE CONCAT('%', :value, '%') AND a.status != 0", nativeQuery = true)
     int getTotalTransactionsWithPaginationFilterByTerminalCode(@Param("value") String value);
     //end case 7
 
     //case 8: filter group transaction - group transaction filter - subCode
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.subCode LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.sub_code LIKE CONCAT('%', :value, '%') AND a.status != 0"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterBySubCode(
             @Param("value") String value,
             @Param("offset") int offset,
             @Param("limit") int size);
 
     @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a" +
-            "                        WHERE a.sub_code LIKE CONCAT('%', :value, '%')", nativeQuery = true)
+            "                        WHERE a.sub_code LIKE CONCAT('%', :value, '%') AND a.status != 0", nativeQuery = true)
     int getTotalTransactionsWithPaginationFilterBySubCode(@Param("value") String value);
     //end case 8
 
     //case 9: filter group transaction - group transaction filter - content
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.content LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.content LIKE CONCAT('%', :value, '%') AND a.status != 0"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByContent(
             @Param("value") String value,
             @Param("offset") int offset,
             @Param("limit") int size);
 
     @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a" +
-            "                        WHERE a.content LIKE CONCAT('%', :value, '%')", nativeQuery = true)
+            "                        WHERE a.content LIKE CONCAT('%', :value, '%') AND a.status != 0", nativeQuery = true)
     int getTotalTransactionsWithPaginationFilterByContent(@Param("value") String value);
     //end case 9
 
 
     //case 10: filter transaction status - search by transaction status
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.status = :status"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.status = :status" +
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByStatus(
             @Param("status") int status,
             @Param("offset") int offset,
@@ -389,26 +337,20 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
 
 
     //case 11: filter transaction by time create from to && group transaction filter - bankAccount
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.timeCreated >= :from AND temp.timeCreated <= :to AND temp.bankAccount LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.time >= :from AND a.time <= :to AND a.bank_account LIKE CONCAT('%', :value, '%') AND a.status != 0"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByCreateTimeAndBankAccount(
             @Param("from") Long from,
             @Param("to") Long to,
@@ -417,33 +359,27 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
             @Param("limit") int size);
 
     @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a" +
-            "                        WHERE a.time >= :from AND a.time <= :to AND a.bank_account LIKE CONCAT('%', :value, '%')", nativeQuery = true)
+            "                        WHERE a.time >= :from AND a.time <= :to AND a.bank_account LIKE CONCAT('%', :value, '%') AND a.status != 0", nativeQuery = true)
     int getTotalTransactionsWithPaginationFilterByCreateTimeAndBankAccount(@Param("from") Long from,
                                                                            @Param("to") Long to,
                                                                            @Param("value") String value);
     //end case 11
 
     //case 12: filter transaction by time create from to && group transaction filter - referenceNumber
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.timeCreated >= :from AND temp.timeCreated <= :to AND temp.referenceNumber LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.time >= :from AND a.time <= :to AND a.reference_number LIKE CONCAT('%', :value, '%') AND a.status != 0"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByCreateTimeAndReferenceNumber(
             @Param("from") Long from,
             @Param("to") Long to,
@@ -452,7 +388,7 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
             @Param("limit") int size);
 
     @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a" +
-            "                        WHERE a.time >= :from AND a.time <= :to AND a.reference_number LIKE CONCAT('%', :value, '%')", nativeQuery = true)
+            "                        WHERE a.time >= :from AND a.time <= :to AND a.reference_number LIKE CONCAT('%', :value, '%') AND a.status != 0", nativeQuery = true)
     int getTotalTransactionsWithPaginationFilterByCreateTimeAndReferenceNumber(@Param("from") Long from,
                                                                            @Param("to") Long to,
                                                                            @Param("value") String value);
@@ -460,26 +396,20 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
 
 
     //case 13: filter transaction by time create from to && group transaction filter - orderId
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.timeCreated >= :from AND temp.timeCreated <= :to AND temp.orderId LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.time >= :from AND a.time <= :to AND a.order_id LIKE CONCAT('%', :value, '%') AND a.status != 0"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByCreateTimeAndOrderId(
             @Param("from") Long from,
             @Param("to") Long to,
@@ -488,7 +418,7 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
             @Param("limit") int size);
 
     @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a" +
-            "            WHERE a.time >= :from AND a.time <= :to AND a.order_id LIKE CONCAT('%', :value, '%')", nativeQuery = true)
+            "            WHERE a.time >= :from AND a.time <= :to AND a.order_id LIKE CONCAT('%', :value, '%') AND a.status != 0", nativeQuery = true)
     int getTotalTransactionsWithPaginationFilterByCreateTimeAndOrderId(@Param("from") Long from,
                                                                                @Param("to") Long to,
                                                                                @Param("value") String value);
@@ -496,26 +426,20 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
 
 
     //case 14: filter transaction by time create from to && group transaction filter - terminalCode
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.timeCreated >= :from AND temp.timeCreated <= :to AND temp.terminalCode LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.time >= :from AND a.time <= :to AND a.terminal_code LIKE CONCAT('%', :value, '%') AND a.status != 0"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByCreateTimeAndTerminalCode(
             @Param("from") Long from,
             @Param("to") Long to,
@@ -524,7 +448,7 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
             @Param("limit") int size);
 
     @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a" +
-            "            WHERE a.time >= :from AND a.time <= :to AND a.terminal_code LIKE CONCAT('%', :value, '%')", nativeQuery = true)
+            "            WHERE a.time >= :from AND a.time <= :to AND a.terminal_code LIKE CONCAT('%', :value, '%') AND a.status != 0", nativeQuery = true)
     int getTotalTransactionsWithPaginationFilterByCreateTimeAndTerminalCode(@Param("from") Long from,
                                                                        @Param("to") Long to,
                                                                        @Param("value") String value);
@@ -533,26 +457,20 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
 
 
     //case 15: filter transaction by time create from to && group transaction filter - subCode
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.timeCreated >= :from AND temp.timeCreated <= :to AND temp.subCode LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.time >= :from AND a.time <= :to AND a.sub_code LIKE CONCAT('%', :value, '%') AND a.status != 0"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByCreateTimeAndSubCode(
             @Param("from") Long from,
             @Param("to") Long to,
@@ -561,7 +479,7 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
             @Param("limit") int size);
 
     @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a" +
-            "            WHERE a.time >= :from AND a.time <= :to AND a.sub_code LIKE CONCAT('%', :value, '%')", nativeQuery = true)
+            "            WHERE a.time >= :from AND a.time <= :to AND a.sub_code LIKE CONCAT('%', :value, '%') AND a.status != 0", nativeQuery = true)
     int getTotalTransactionsWithPaginationFilterByCreateTimeAndSubCode(@Param("from") Long from,
                                                                             @Param("to") Long to,
                                                                             @Param("value") String value);
@@ -569,26 +487,20 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
 
 
     //case 16: filter transaction by time create from to && group transaction filter - content
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.timeCreated >= :from AND temp.timeCreated <= :to AND temp.content LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.time >= :from AND a.time <= :to AND a.content LIKE CONCAT('%', :value, '%') AND a.status != 0"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByCreateTimeAndContent(
             @Param("from") Long from,
             @Param("to") Long to,
@@ -597,7 +509,7 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
             @Param("limit") int size);
 
     @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a" +
-            "            WHERE a.time >= :from AND a.time <= :to AND a.content LIKE CONCAT('%', :value, '%')", nativeQuery = true)
+            "            WHERE a.time >= :from AND a.time <= :to AND a.content LIKE CONCAT('%', :value, '%') AND a.status != 0", nativeQuery = true)
     int getTotalTransactionsWithPaginationFilterByCreateTimeAndContent(@Param("from") Long from,
                                                                        @Param("to") Long to,
                                                                        @Param("value") String value);
@@ -605,26 +517,20 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
 
 
     //case 17: filter transaction by time create from to && transaction status
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.timeCreated >= :from AND temp.timeCreated <= :to AND temp.status = :status"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.time >= :from AND a.time <= :to AND a.status = :status"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByCreateTimeAndStatus(
             @Param("from") Long from,
             @Param("to") Long to,
@@ -641,26 +547,20 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
 
 
     //case 18: filter transaction by status && group transaction filter - bankAccount
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.status = :status AND temp.bankAccount LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.status = :status AND a.bank_account LIKE CONCAT('%', :value, '%')"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByStatusAndBankAccount(
             @Param("status") int status,
             @Param("value") String value,
@@ -675,26 +575,20 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
 
 
     //case 19: filter transaction by status && group transaction filter - referenceNumber
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.status = :status AND temp.referenceNumber LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.status = :status AND a.reference_number LIKE CONCAT('%', :value, '%')"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByStatusAndReferenceNumber(
             @Param("status") int status,
             @Param("value") String value,
@@ -709,26 +603,20 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
 
 
     //case 20: filter transaction by status && group transaction filter - orderId
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.status = :status AND temp.orderId LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.status = :status AND a.order_id LIKE CONCAT('%', :value, '%')"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByStatusAndOrderId(
             @Param("status") int status,
             @Param("value") String value,
@@ -743,26 +631,20 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
 
 
     //case 21: filter transaction by status && group transaction filter - terminalCode
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.status = :status AND temp.terminalCode LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.status = :status AND a.terminal_code LIKE CONCAT('%', :value, '%')"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByStatusAndTerminalCode(
             @Param("status") int status,
             @Param("value") String value,
@@ -777,26 +659,20 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
 
 
     //case 22: filter transaction by status && group transaction filter - subCode
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.status = :status AND temp.subCode LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.status = :status AND a.sub_code LIKE CONCAT('%', :value, '%')"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByStatusAndSubCode(
             @Param("status") int status,
             @Param("value") String value,
@@ -812,26 +688,20 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
 
 
     //case 23: filter transaction by status && group transaction filter - content
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.status = :status AND temp.content LIKE CONCAT('%', :value, '%')"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.status = :status AND a.content LIKE CONCAT('%', :value, '%')"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByStatusAndContent(
             @Param("status") int status,
             @Param("value") String value,
@@ -845,27 +715,21 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
     //end case 23
 
     //case 24: filter transaction by time create from to && status && group transaction filter - bankAccount
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.status = :status AND temp.bankAccount LIKE CONCAT('%', :value, '%')" +
-            "            AND temp.timeCreated >= :from AND temp.timeCreated <= :to"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.status = :status AND a.bank_account LIKE CONCAT('%', :value, '%')"+
+            "                        AND a.time >= :from AND a.time <= :to"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByTimeCreateAndStatusAndBankAccount(
             @Param("from") Long from,
             @Param("to") Long to,
@@ -886,27 +750,21 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
 
 
     //case 25: filter transaction by time create from to && status && group transaction filter - referenceNumber
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.status = :status AND temp.referenceNumber LIKE CONCAT('%', :value, '%')" +
-            "            AND temp.timeCreated >= :from AND temp.timeCreated <= :to"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.status = :status AND a.reference_number LIKE CONCAT('%', :value, '%')"+
+            "                        AND a.time >= :from AND a.time <= :to"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByTimeCreateAndStatusAndReferenceNumber(
             @Param("from") Long from,
             @Param("to") Long to,
@@ -926,27 +784,21 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
     //end case 25
 
     //case 26: filter transaction by time create from to && status && group transaction filter - orderId
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.status = :status AND temp.orderId LIKE CONCAT('%', :value, '%')" +
-            "            AND temp.timeCreated >= :from AND temp.timeCreated <= :to"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.status = :status AND a.order_id LIKE CONCAT('%', :value, '%')"+
+            "                        AND a.time >= :from AND a.time <= :to"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByTimeCreateAndStatusAndOrderId(
             @Param("from") Long from,
             @Param("to") Long to,
@@ -966,27 +818,21 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
     //end case 26
 
     //case 27: filter transaction by time create from to && status && group transaction filter - terminalCode
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.status = :status AND temp.terminalCode LIKE CONCAT('%', :value, '%')" +
-            "            AND temp.timeCreated >= :from AND temp.timeCreated <= :to"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.status = :status AND a.terminal_code LIKE CONCAT('%', :value, '%')"+
+            "                        AND a.time >= :from AND a.time <= :to"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByTimeCreateAndStatusAndTerminalCode(
             @Param("from") Long from,
             @Param("to") Long to,
@@ -1007,27 +853,21 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
 
 
     //case 28: filter transaction by time create from to && status && group transaction filter - subCode
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.status = :status AND temp.subCode LIKE CONCAT('%', :value, '%')" +
-            "            AND temp.timeCreated >= :from AND temp.timeCreated <= :to"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.status = :status AND a.sub_code LIKE CONCAT('%', :value, '%')"+
+            "                        AND a.time >= :from AND a.time <= :to"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByTimeCreateAndStatusAndSubCode(
             @Param("from") Long from,
             @Param("to") Long to,
@@ -1047,27 +887,21 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
     //end case 28
 
     //case 29: filter transaction by time create from to && status && group transaction filter - content
-    @Query(value = "SELECT temp.id, temp.amount, temp.timePaid, temp.referenceNumber, temp.orderId," +
-            "temp.terminalCode, temp.subCode, temp.type, temp.timeCreated, " +
-            "temp.bankAccount, temp.bankId, c.bank_short_name as bankShortName, " +
-            "            temp.content, temp.transStatus, temp.statusResponse, temp.note, temp.transType, " +
-            "            temp.status" +
-            "            FROM (" +
-            "            SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
-            "            a.content, a.order_id as orderId, " +
-            "            a.time as timeCreated, a.time_paid as timePaid," +
-            "            a.reference_number as referenceNumber," +
-            "            a.type," +
-            "            a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
-            "            a.sub_code as subCode,a.note, " +
-            "            a.trans_type as transType, a.status" +
-            "            FROM transaction_receive a ORDER BY a.time DESC" +
-            "            ) AS temp" +
-            "            LEFT JOIN account_bank_receive b ON temp.bankId = b.id " +
-            "            LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
-            "            WHERE temp.status = :status AND temp.content LIKE CONCAT('%', :value, '%')" +
-            "            AND temp.timeCreated >= :from AND temp.timeCreated <= :to"+
-            "            LIMIT :offset, :limit", nativeQuery = true)
+    @Query(value = "SELECT c.bank_short_name as bankShortName, " +
+            "                        a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, " +
+            "                        a.content, a.order_id as orderId, " +
+            "                        a.time as timeCreated, a.time_paid as timePaid," +
+            "                        a.reference_number as referenceNumber," +
+            "                        a.type," +
+            "                        a.trans_status as transStatus, a.status_response as statusResponse, a.terminal_code as terminalCode," +
+            "                        a.sub_code as subCode,a.note, a.trans_type as transType, a.status" +
+            "                        FROM transaction_receive a" +
+            "                        LEFT JOIN account_bank_receive b ON a.bank_id = b.id " +
+            "                        LEFT JOIN bank_type c ON b.bank_type_id = c.id" +
+            "                        WHERE a.status = :status AND a.content LIKE CONCAT('%', :value, '%')"+
+            "                        AND a.time >= :from AND a.time <= :to"+
+            "                        ORDER BY a.`time` DESC" +
+            "                        LIMIT :offset, :limit", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionsWithPaginationFilterByTimeCreateAndStatusAndContent(
             @Param("from") Long from,
             @Param("to") Long to,
@@ -1085,4 +919,30 @@ public interface TransactionRepository extends JpaRepository<TransactionReceiveE
             @Param("status") int status,
             @Param("value") String value);
     //end case 29
+
+
+
+
+
+    @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+            + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, a.sign, a.trace_id as traceId, a.type, b.bank_account_name as userBankName,  "
+            + "b.national_id as nationalId, b.phone_authenticated as phoneAuthenticated, b.is_authenticated as sync, c.bank_code as bankCode, c.bank_short_name as bankShortName, c.bank_name as bankName, c.img_id as imgId, "
+            + "CASE  "
+            + "WHEN b.is_sync = true AND b.mms_active = false THEN 1  "
+            + "WHEN b.is_sync = true AND b.mms_active = true THEN 2  "
+            + "WHEN b.is_sync = false AND b.mms_active = true THEN 2  "
+            + "ELSE 0  "
+            + "END as flow, "
+            + "a.terminal_code as terminalCode, a.note, "
+            + "a.sub_code as subCode, "
+            + "a.service_code AS serviceCode, "
+            + "a.additional_data as additionalData, "
+            + "b.mms_active as mmsActive "
+            + "FROM transaction_receive a  "
+            + "LEFT JOIN account_bank_receive b  "
+            + "ON a.bank_id = b.id  "
+            + "LEFT JOIN bank_type c  "
+            + "ON b.bank_type_id = c.id  "
+            + "WHERE a.id = :transactionId ", nativeQuery = true)
+    TransReceiveAdminDetailDTO getDetailTransReceiveAdmin(@Param(value = "transactionId") String transactionId);
 }

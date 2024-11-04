@@ -3,19 +3,15 @@ package com.vietqradminbe.infrastructure.configuration.security.utils;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import com.vietqradminbe.domain.exceptions.BadRequestException;
 import com.vietqradminbe.domain.exceptions.ErrorCode;
 import com.vietqradminbe.domain.models.User;
-import com.vietqradminbe.domain.repositories.RoleRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

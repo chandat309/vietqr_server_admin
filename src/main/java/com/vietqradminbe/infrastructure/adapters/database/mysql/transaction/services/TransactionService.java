@@ -1,10 +1,10 @@
 package com.vietqradminbe.infrastructure.adapters.database.mysql.transaction.services;
 
-import antlr.StringUtils;
 import com.vietqradminbe.infrastructure.adapters.database.mysql.transaction.repositories.TransactionRepository;
 import com.vietqradminbe.infrastructure.adapters.database.mysql.transaction.services.interfaces.ITransactionService;
 import com.vietqradminbe.web.dto.request.RequestFilterTransactionRequest;
 import com.vietqradminbe.web.dto.response.TransactionReceivePaginationResponseDTO;
+import com.vietqradminbe.web.dto.response.interfaces.TransReceiveAdminDetailDTO;
 import com.vietqradminbe.web.dto.response.interfaces.TransactionReceiveAdminListDTO;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -41,6 +40,8 @@ public class TransactionService implements ITransactionService {
                 from, to, bankAccount, id, orderId, terminalCode, subCode, transStatus, offset, size
         );
 
+        transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
+
         int total = transactionRepository.getTotalTransByBankAccountAllFilter(
                 from, to, bankAccount, id, orderId, terminalCode, subCode, transStatus);
 
@@ -61,6 +62,7 @@ public class TransactionService implements ITransactionService {
     public TransactionReceivePaginationResponseDTO getTransactionsWithPaginationAllFilter(int page, int size) {
         int offset = (page - 1) * size;
         List<TransactionReceiveAdminListDTO> transactions = transactionRepository.getTransactionsWithPaginationAllFilter(offset, size);
+        transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
 
         int total = transactionRepository.getTotalTransactionsWithPaginationAllFilter();
 
@@ -90,6 +92,7 @@ public class TransactionService implements ITransactionService {
             List<TransactionReceiveAdminListDTO> transactions =
                     transactionRepository.getTransactionsWithPaginationFilterByTimeCreate(request.getTypeA().getFrom(), request.getTypeA().getTo(), offset, request.getSize());
 
+            transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
             //count total of transaction filter
             int total = transactionRepository.getTotalTransactionsWithPaginationFilterByTimeCreate(request.getTypeA().getFrom(), request.getTypeA().getTo());
 
@@ -116,6 +119,8 @@ public class TransactionService implements ITransactionService {
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByBankAccount(request.getTypeC().getBankAccount(), offset, request.getSize());
 
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
+
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByBankAccount(request.getTypeC().getBankAccount());
 
@@ -137,6 +142,8 @@ public class TransactionService implements ITransactionService {
                 int offset = (request.getPage() - 1) * request.getSize();
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByReferenceNumber(request.getTypeC().getReferenceNumber(), offset, request.getSize());
+
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
 
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByBankAccount(request.getTypeC().getReferenceNumber());
@@ -161,6 +168,8 @@ public class TransactionService implements ITransactionService {
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByTerminalCode(request.getTypeC().getTerminalCode(), offset, request.getSize());
 
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
+
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByReferenceNumber(request.getTypeC().getTerminalCode());
 
@@ -183,6 +192,8 @@ public class TransactionService implements ITransactionService {
                 int offset = (request.getPage() - 1) * request.getSize();
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterBySubCode(request.getTypeC().getSubCode(), offset, request.getSize());
+
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
 
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterBySubCode(request.getTypeC().getSubCode());
@@ -207,6 +218,8 @@ public class TransactionService implements ITransactionService {
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByOrderId(request.getTypeC().getOrderId(), offset, request.getSize());
 
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
+
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByOrderId(request.getTypeC().getOrderId());
 
@@ -229,6 +242,8 @@ public class TransactionService implements ITransactionService {
                 int offset = (request.getPage() - 1) * request.getSize();
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByContent(request.getTypeC().getContent(), offset, request.getSize());
+
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
 
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByContent(request.getTypeC().getContent());
@@ -256,6 +271,8 @@ public class TransactionService implements ITransactionService {
             List<TransactionReceiveAdminListDTO> transactions =
                     transactionRepository.getTransactionsWithPaginationFilterByStatus(request.getTypeD().getStatus(), offset, request.getSize());
 
+            transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
+
             //count total of transaction filter
             int total = transactionRepository.getTotalTransactionsWithPaginationFilterByStatus(request.getTypeD().getStatus());
 
@@ -277,6 +294,8 @@ public class TransactionService implements ITransactionService {
                 int offset = (request.getPage() - 1) * request.getSize();
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByCreateTimeAndBankAccount(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeC().getBankAccount(), offset, request.getSize());
+
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
 
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByCreateTimeAndBankAccount(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeC().getBankAccount());
@@ -301,6 +320,8 @@ public class TransactionService implements ITransactionService {
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByCreateTimeAndReferenceNumber(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeC().getReferenceNumber(), offset, request.getSize());
 
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
+
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByCreateTimeAndReferenceNumber(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeC().getReferenceNumber());
 
@@ -323,6 +344,8 @@ public class TransactionService implements ITransactionService {
                 int offset = (request.getPage() - 1) * request.getSize();
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByCreateTimeAndOrderId(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeC().getOrderId(), offset, request.getSize());
+
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
 
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByCreateTimeAndOrderId(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeC().getOrderId());
@@ -347,6 +370,8 @@ public class TransactionService implements ITransactionService {
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByCreateTimeAndTerminalCode(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeC().getTerminalCode(), offset, request.getSize());
 
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
+
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByCreateTimeAndTerminalCode(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeC().getTerminalCode());
 
@@ -369,6 +394,8 @@ public class TransactionService implements ITransactionService {
                 int offset = (request.getPage() - 1) * request.getSize();
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByCreateTimeAndTerminalCode(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeC().getSubCode(), offset, request.getSize());
+
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
 
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByCreateTimeAndTerminalCode(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeC().getSubCode());
@@ -393,6 +420,8 @@ public class TransactionService implements ITransactionService {
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByCreateTimeAndTerminalCode(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeC().getContent(), offset, request.getSize());
 
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
+
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByCreateTimeAndTerminalCode(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeC().getContent());
 
@@ -415,6 +444,8 @@ public class TransactionService implements ITransactionService {
             List<TransactionReceiveAdminListDTO> transactions =
                     transactionRepository.getTransactionsWithPaginationFilterByCreateTimeAndStatus(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeD().getStatus(), offset, request.getSize());
 
+            transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
+
             //count total of transaction filter
             int total = transactionRepository.getTotalTransactionsWithPaginationFilterByCreateTimeAndStatus(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeD().getStatus());
 
@@ -436,6 +467,8 @@ public class TransactionService implements ITransactionService {
                 int offset = (request.getPage() - 1) * request.getSize();
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByStatusAndBankAccount(request.getTypeD().getStatus(), request.getTypeC().getBankAccount(), offset, request.getSize());
+
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
 
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByStatusAndBankAccount(request.getTypeD().getStatus(), request.getTypeC().getBankAccount());
@@ -460,6 +493,8 @@ public class TransactionService implements ITransactionService {
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByStatusAndReferenceNumber(request.getTypeD().getStatus(), request.getTypeC().getReferenceNumber(), offset, request.getSize());
 
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
+
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByStatusAndReferenceNumber(request.getTypeD().getStatus(), request.getTypeC().getReferenceNumber());
 
@@ -482,6 +517,8 @@ public class TransactionService implements ITransactionService {
                 int offset = (request.getPage() - 1) * request.getSize();
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByStatusAndOrderId(request.getTypeD().getStatus(), request.getTypeC().getOrderId(), offset, request.getSize());
+
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
 
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByStatusAndOrderId(request.getTypeD().getStatus(), request.getTypeC().getOrderId());
@@ -506,6 +543,8 @@ public class TransactionService implements ITransactionService {
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByStatusAndTerminalCode(request.getTypeD().getStatus(), request.getTypeC().getTerminalCode(), offset, request.getSize());
 
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
+
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByStatusAndTerminalCode(request.getTypeD().getStatus(), request.getTypeC().getTerminalCode());
 
@@ -529,6 +568,7 @@ public class TransactionService implements ITransactionService {
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByStatusAndSubCode(request.getTypeD().getStatus(), request.getTypeC().getSubCode(), offset, request.getSize());
 
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByStatusAndSubCode(request.getTypeD().getStatus(), request.getTypeC().getSubCode());
 
@@ -551,6 +591,8 @@ public class TransactionService implements ITransactionService {
                 int offset = (request.getPage() - 1) * request.getSize();
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByStatusAndContent(request.getTypeD().getStatus(), request.getTypeC().getContent(), offset, request.getSize());
+
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
 
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByStatusAndContent(request.getTypeD().getStatus(), request.getTypeC().getContent());
@@ -575,6 +617,8 @@ public class TransactionService implements ITransactionService {
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByTimeCreateAndStatusAndBankAccount(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeD().getStatus(), request.getTypeC().getBankAccount(), offset, request.getSize());
 
+
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByTimeCreateAndStatusAndBankAccount(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeD().getStatus(), request.getTypeC().getBankAccount());
 
@@ -601,6 +645,8 @@ public class TransactionService implements ITransactionService {
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByTimeCreateAndStatusAndReferenceNumber(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeD().getStatus(), request.getTypeC().getReferenceNumber());
 
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
+
                 //check if has next page
                 boolean hasNext = (offset + transactions.size()) < total;
 
@@ -621,6 +667,8 @@ public class TransactionService implements ITransactionService {
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByTimeCreateAndStatusAndOrderId(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeD().getStatus() ,request.getTypeC().getOrderId(), offset, request.getSize());
 
+
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByTimeCreateAndStatusAndOrderId(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeD().getStatus(), request.getTypeC().getOrderId());
 
@@ -644,6 +692,8 @@ public class TransactionService implements ITransactionService {
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByTimeCreateAndStatusAndTerminalCode(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeD().getStatus() ,request.getTypeC().getTerminalCode(), offset, request.getSize());
 
+
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByTimeCreateAndStatusAndTerminalCode(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeD().getStatus(),request.getTypeC().getTerminalCode());
 
@@ -666,6 +716,8 @@ public class TransactionService implements ITransactionService {
                 int offset = (request.getPage() - 1) * request.getSize();
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByTimeCreateAndStatusAndSubCode(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeD().getStatus(),request.getTypeC().getSubCode(), offset, request.getSize());
+
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
 
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByTimeCreateAndStatusAndSubCode(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeD().getStatus(),request.getTypeC().getSubCode());
@@ -690,6 +742,8 @@ public class TransactionService implements ITransactionService {
                 List<TransactionReceiveAdminListDTO> transactions =
                         transactionRepository.getTransactionsWithPaginationFilterByTimeCreateAndStatusAndContent(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeD().getStatus(),request.getTypeC().getContent(), offset, request.getSize());
 
+                transactions.sort((t1, t2) -> t2.getTimeCreated().compareTo(t1.getTimeCreated()));
+
                 //count total of transaction filter
                 int total = transactionRepository.getTotalTransactionsWithPaginationFilterByTimeCreateAndStatusAndContent(request.getTypeA().getFrom(), request.getTypeA().getTo(), request.getTypeD().getStatus(),request.getTypeC().getContent());
 
@@ -710,5 +764,10 @@ public class TransactionService implements ITransactionService {
         // set default for search all
         TransactionReceivePaginationResponseDTO transactionsWithPaginationAllFilter = getTransactionsWithPaginationAllFilter(request.getPage(), request.getSize());
         return transactionsWithPaginationAllFilter;
+    }
+
+    @Override
+    public TransReceiveAdminDetailDTO getDetailTransReceiveAdmin(String transactionId) {
+        return transactionRepository.getDetailTransReceiveAdmin(transactionId);
     }
 }

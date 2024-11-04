@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vietqradminbe.domain.exceptions.BadRequestException;
 import com.vietqradminbe.domain.exceptions.ErrorCode;
 import com.vietqradminbe.web.controllers.RoleController;
 import com.vietqradminbe.web.dto.response.APIResponse;

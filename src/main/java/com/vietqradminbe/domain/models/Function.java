@@ -14,14 +14,14 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "feature")
-public class Feature implements Serializable {
+@Table(name = "function")
+public class Function implements Serializable {
     @Id
     @Column(name = "id")
     String id;
 
-    @Column(name = "feature_name", nullable = false)
-    String featureName;
+    @Column(name = "function_name", nullable = false)
+    String functionName;
 
     @Column(name = "description", nullable = false)
     String description;

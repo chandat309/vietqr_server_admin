@@ -13,8 +13,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "action_log")
-public class ActionLog implements Serializable {
+@Table(name = "activity_user_log")
+public class ActivityUserLog implements Serializable {
     @Id
     @Column(name = "id")
     String id;
@@ -37,11 +37,8 @@ public class ActionLog implements Serializable {
     @Column(name = "phone_number",nullable = false)
     String phoneNumber;
 
-    @Column(name = "created_at", updatable = false, nullable = false)
-    String createAt;
-
-    @Column(name = "updated_at", nullable = false)
-    String updateAt;
+    @Column(name = "time_log", updatable = false, nullable = false)
+    String timeLog;
 
     @ManyToOne()
     @JoinColumn(name = "user_id", nullable = false)

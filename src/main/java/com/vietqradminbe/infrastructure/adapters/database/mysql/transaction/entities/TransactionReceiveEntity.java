@@ -1,9 +1,7 @@
 package com.vietqradminbe.infrastructure.adapters.database.mysql.transaction.entities;
 
-import com.vietqradminbe.web.dto.response.interfaces.TransactionReceiveAdminListDTO;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
 import javax.persistence.*;
 
 @Entity
