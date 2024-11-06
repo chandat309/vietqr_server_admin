@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableTransactionManagement
@@ -45,10 +47,13 @@ public class AdminDatabaseConfig {
     @Bean(name = "adminEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean adminEntityManagerFactory(
             EntityManagerFactoryBuilder builder) {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("hibernate.hbm2ddl.auto", "update");
         return builder
                 .dataSource(adminDataSource())
                 .packages("com.vietqradminbe.domain.models")
                 .persistenceUnit("admin")
+                .properties(properties)
                 .build();
     }
 
