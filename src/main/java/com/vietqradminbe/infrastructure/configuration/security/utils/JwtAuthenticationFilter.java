@@ -3,11 +3,14 @@ package com.vietqradminbe.infrastructure.configuration.security.utils;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vietqradminbe.domain.models.Account;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.vietqradminbe.domain.exceptions.BadRequestException;
+import com.vietqradminbe.domain.exceptions.ErrorCode;
+import com.vietqradminbe.domain.models.User;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,21 +30,23 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
-            Account account = new ObjectMapper().readValue(request.getInputStream(), Account.class);
-            return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(account.getUsername(),
-                    account.getPassword(), new ArrayList<>()));
+            User user = new ObjectMapper().readValue(request.getInputStream(), User.class);
+            return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(),
+                    user.getPasswordHash(), new ArrayList<>()));
         } catch (StreamReadException e) {
             throw new RuntimeException(e);
         } catch (DatabindException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (ExpiredJwtException e) {
+            throw new BadRequestException(ErrorCode.TOKEN_EXPIRED);
         }
     }
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        String token = jwtUtil.generateToken((UserDetails) authResult.getPrincipal(), null);
+        String token = jwtUtil.generateToken((UserDetails) authResult.getPrincipal());
         response.addHeader("Authorization", "Bearer " + token);
     }
 }

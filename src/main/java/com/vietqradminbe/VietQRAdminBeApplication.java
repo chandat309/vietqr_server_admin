@@ -2,13 +2,13 @@ package com.vietqradminbe;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 @SpringBootApplication
-public class VietQRAdminBeApplication {
+public class VietQRAdminBeApplication extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {
 		SpringApplication.run(VietQRAdminBeApplication.class, args);
 	}
-
 
 }
