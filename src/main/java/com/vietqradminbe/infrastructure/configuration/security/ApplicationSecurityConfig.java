@@ -36,7 +36,9 @@ public class ApplicationSecurityConfig {
     private CustomUserDetailsService customUserDetailsService;
 
     private static final String[] WHITE_LIST_URL = {"/api/v1/auth/register", "/api/v1/login/**", "/swagger-ui/**", "/swagger-ui.html"
-            , "/v3/api-docs/**", "/h2-console/**", "/api/v1/version/**", "/api/v1/refreshtoken/**", "/api/v1/admin-keys-export/**"};
+            , "/v3/api-docs/**", "/h2-console/**", "/api/v1/version/**", "/api/v1/refreshtoken/**", "/api/v1/admin-keys-export/**", "/api/v1/provinces", "/api/v1/districts"
+            , "/api/v1/districts/*", "/api/v1/wards", "/api/v1/wards/*"};
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -65,7 +67,6 @@ public class ApplicationSecurityConfig {
                                 .requestMatchers(new AntPathRequestMatcher("/api/v1/transaction-logs")).hasAuthority("ADMIN_ROLE")
                                 .requestMatchers(new AntPathRequestMatcher("/api/v1/key-active-bank/generate-key")).hasAuthority("ADMIN_ROLE")
                                 .requestMatchers(new AntPathRequestMatcher("/api/v1/logs")).hasAuthority("ADMIN_ROLE")
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/active-keys")).hasAuthority("ADMIN_ROLE")
                                 .requestMatchers(new AntPathRequestMatcher("/api/v1/auth/reset-password")).hasAnyAuthority("ADMIN_ROLE", "ACCOUNTANCE_ROLE", "IT_SUPPORT_ROLE")
                                 .anyRequest()
                                 .authenticated();

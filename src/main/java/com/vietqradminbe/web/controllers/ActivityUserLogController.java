@@ -33,7 +33,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ActivityUserLogController {
-    static Logger logger = Logger.getLogger(UserController.class);
+    static Logger logger = Logger.getLogger(ActivityUserLogController.class);
 
     UserService userService;
     JwtUtil jwtUtil;
