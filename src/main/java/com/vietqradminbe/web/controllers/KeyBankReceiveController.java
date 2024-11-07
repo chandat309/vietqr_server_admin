@@ -1,27 +1,32 @@
 package com.vietqradminbe.web.controllers;
 
-import com.vietqradminbe.application.services.UserService;
 import com.vietqradminbe.application.services.interfaces.IKeyActiveBankReceiveService;
 import com.vietqradminbe.application.services.interfaces.IUserService;
-import com.vietqradminbe.domain.models.KeyActiveBankReceive;
 import com.vietqradminbe.domain.models.User;
-import com.vietqradminbe.infrastructure.configuration.timehelper.TimeHelperUtil;
-import com.vietqradminbe.infrastructure.configuration.utils.BcryptKeyUtil;
-import com.vietqradminbe.infrastructure.configuration.utils.EnvironmentUtil;
 import com.vietqradminbe.web.dto.request.GenerateKeyBankDTO;
 import com.vietqradminbe.web.dto.response.APIResponse;
+import com.vietqradminbe.web.dto.response.PagingDTO;
+import com.vietqradminbe.web.dto.response.interfaces.KeyActiveBankReceiveDTO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -31,6 +36,28 @@ import java.util.*;
 public class KeyBankReceiveController {
     IUserService userService;
     IKeyActiveBankReceiveService keyActiveBankReceiveService;
+
+    @GetMapping("/active-keys")
+    public ResponseEntity<APIResponse<PagingDTO<KeyActiveBankReceiveDTO>>> getKeyActiveBankReceives(
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        APIResponse<PagingDTO<KeyActiveBankReceiveDTO>> response = new APIResponse<>();
+        try {
+            PagingDTO<KeyActiveBankReceiveDTO> keys = keyActiveBankReceiveService.getKeyActiveBankReceives(startDate, endDate, page, size);
+
+            response.setCode(200);
+            response.setMessage("Keys retrieved successfully!");
+            response.setResult(keys);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            response.setCode(500);
+            response.setMessage("Internal server error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 
     @PostMapping("key-active-bank/generate-key")
     public ResponseEntity<APIResponse<List<String>>> generateKeyForAdmin(
@@ -47,28 +74,10 @@ public class KeyBankReceiveController {
                     .anyMatch(role -> "ADMIN_ROLE".equals(role.getRole().getRoleName()))) {
 
                 log.info("generateKeyForAdmin: request: " + dto + " by: " + username + " at: " + System.currentTimeMillis());
-                List<String> keyActives = generateKeyActiveWithCheckDuplicated(dto.getNumOfKeys());
-                List<KeyActiveBankReceive> entities = new ArrayList<>();
 
-                for (String keyActive : keyActives) {
-                    String secretKey = generateSecretKey(); // Khởi tạo secretKey trước
-                    String valueActive = generateValueActive(keyActive, secretKey, dto.getDuration()); // Gọi generateValueActive với giá trị secretKey
+                // Gọi service để generate và save keys
+                List<String> keyActives = keyActiveBankReceiveService.generateAndSaveKeys(user, dto);
 
-                    KeyActiveBankReceive entity = KeyActiveBankReceive.builder()
-                            .id(UUID.randomUUID().toString())
-                            .keyActive(keyActive)
-                            .secretKey(secretKey)
-                            .valueActive(valueActive)
-                            .duration(dto.getDuration())
-                            .createAt(TimeHelperUtil.getCurrentTime())
-                            .createBy(username)
-                            .status(1)
-                            .user(user)
-                            .build();
-                    entities.add(entity);
-                }
-
-                keyActiveBankReceiveService.insertAll(entities);
                 response = new APIResponse<>(200, "Keys generated successfully", keyActives);
                 httpStatus = HttpStatus.OK;
             } else {
@@ -85,6 +94,49 @@ public class KeyBankReceiveController {
         return new ResponseEntity<>(response, httpStatus);
     }
 
+    @GetMapping("/admin-keys-export")
+    public ResponseEntity<byte[]> exportKeysToExcel(
+            @RequestParam List<String> keys) {
+
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Generated Keys");
+
+            // Tạo hàng tiêu đề
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("STT");
+            headerRow.createCell(1).setCellValue("Key dạng String");
+            headerRow.createCell(2).setCellValue("Key dạng QR link");
+
+            // Điền dữ liệu vào các hàng
+            for (int i = 0; i < keys.size(); i++) {
+                Row row = sheet.createRow(i + 1);
+                String key = keys.get(i);
+
+                row.createCell(0).setCellValue(i + 1); // STT
+                row.createCell(1).setCellValue(key); // Key dạng String
+                row.createCell(2).setCellValue("https://vietqr.vn/service-active?key=" + key); // Key dạng QR link
+            }
+
+            // Thiết lập kích thước cột tự động
+            sheet.autoSizeColumn(0);
+            sheet.autoSizeColumn(1);
+            sheet.autoSizeColumn(2);
+
+            // Ghi workbook vào một mảng byte
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+
+            // Thiết lập tiêu đề response
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "GeneratedKeys.xlsx");
+
+            return new ResponseEntity<>(outputStream.toByteArray(), headers, HttpStatus.OK);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
     public String getUsernameFromToken(String token) {
         String result = "";
@@ -109,63 +161,6 @@ public class KeyBankReceiveController {
         }
         return result;
     }
-
-    private String generateSecretKey() {
-        return UUID.randomUUID().toString();
-    }
-
-    private String generateValueActive(String keyActive, String secretKey, int duration) {
-        return BcryptKeyUtil.hashKeyActive(keyActive, secretKey, duration);
-    }
-
-    private List<String> generateKeyActiveWithCheckDuplicated(int numOfKeys) {
-        List<String> keys = new ArrayList<>();
-        keys = generateMultikeyActive(numOfKeys);
-        // check duplicated;
-        List<String> keysDuplicated = new ArrayList<>();
-        do {
-            keysDuplicated = keyActiveBankReceiveService.checkDuplicatedKeyActives(keys);
-            if (keysDuplicated.isEmpty()) {
-                break;
-            }
-            // remove duplicated
-            for (String key : keysDuplicated) {
-                keys.remove(key);
-            }
-            // generate new key
-            List<String> newKeys = generateMultikeyActive(keysDuplicated.size());
-            keys.addAll(newKeys);
-        } while (!keysDuplicated.isEmpty());
-        return keys;
-    }
-
-    private List<String> generateMultikeyActive(int numOfKeys) {
-        Set<String> keys = new HashSet<>();
-        for (int i = 0; i < numOfKeys; i++) {
-            String key = generateKeyActive();
-            keys.add(key);
-        }
-        return new ArrayList<>(keys);
-    }
-
-    private String generateKeyActive() {
-        Random random = new Random();
-        int length = EnvironmentUtil.getLengthKeyActiveBank();
-        String characters = EnvironmentUtil.getCharactersKeyActiveBank();
-        StringBuilder sb = new StringBuilder(length);
-
-        for (int i = 0; i < length; i++) {
-            int index = random.nextInt(characters.length());
-            sb.append(characters.charAt(index));
-        }
-        return sb.toString();
-    }
-
-    private boolean isKeyActive(String keyActive, String secretKey, int duration, String valueActive) {
-        String data = BcryptKeyUtil.hashKeyActive(keyActive, secretKey, duration);
-        return data.equals(valueActive);
-    }
-
 
 }
 
