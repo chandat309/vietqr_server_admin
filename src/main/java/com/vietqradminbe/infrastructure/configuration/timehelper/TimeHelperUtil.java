@@ -25,4 +25,10 @@ public class TimeHelperUtil {
         ZonedDateTime vietnamZonedDateTime = localDateTime.atZone(ZoneId.of("Asia/Ho_Chi_Minh"));
         return vietnamZonedDateTime.toInstant().toEpochMilli();
     }
+
+    public static String calculateExpirationTime(String createAt, int durationInMonths) {
+        LocalDateTime createDateTime = LocalDateTime.parse(createAt, FORMATTER);
+        LocalDateTime expirationDateTime = createDateTime.plusMonths(durationInMonths);
+        return expirationDateTime.format(FORMATTER);
+    }
 }

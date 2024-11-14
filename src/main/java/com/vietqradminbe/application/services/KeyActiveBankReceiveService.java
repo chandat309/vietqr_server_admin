@@ -44,6 +44,7 @@ public class KeyActiveBankReceiveService implements IKeyActiveBankReceiveService
             String valueActive = generateValueActive(keyActive, secretKey, dto.getDuration());
 
             String vietnamTimeString = TimeHelperUtil.getCurrentTime();
+            String expirationTimeString = TimeHelperUtil.calculateExpirationTime(vietnamTimeString, dto.getDuration());
             KeyActiveBankReceive entityAdmin = KeyActiveBankReceive.builder()
                     .id(UUID.randomUUID().toString())
                     .keyActive(keyActive)
@@ -52,6 +53,9 @@ public class KeyActiveBankReceiveService implements IKeyActiveBankReceiveService
                     .duration(dto.getDuration())
                     .createAt(vietnamTimeString)
                     .createBy(user.getUsername())
+                    .bankAccountActivated("")
+                    .activationTime("")
+                    .expirationTime(expirationTimeString)
                     .status(0)
                     .user(user)
                     .build();
@@ -98,6 +102,11 @@ public class KeyActiveBankReceiveService implements IKeyActiveBankReceiveService
                 .total(total)
                 .hasNext(hasNext)
                 .build();
+    }
+
+    @Override
+    public List<KeyActiveBankReceiveDTO> getKeyDetailsByKeys(List<String> keys) {
+        return keyActiveBankReceiveRepository.findByKeyActiveIn(keys);
     }
 
     private String generateSecretKey() {

@@ -8,4 +8,8 @@ public interface KeyActiveBankReceiveDTO {
     int getDuration();
     String getKeyActive();
     String getQrLink();
+    String getBankAccountActivated();
+    int getStatus();
+    String getActivationTime();
+    String getExpirationTime();
 }
