@@ -17,7 +17,9 @@ public interface KeyActiveBankReceiveRepository extends JpaRepository<KeyActiveB
     List<String> checkDuplicatedKeyActives(@Param(value = "keyActives") List<String> keyActives);
 
     @Query(value = "SELECT k.id, k.create_at AS createAt, k.create_by AS createBy, k.duration, " +
-            "k.key_active AS keyActive, CONCAT('https://vietqr.vn/service-active?key=', k.key_active) AS qrLink " +
+            "k.key_active AS keyActive, CONCAT('https://vietqr.vn/service-active?key=', k.key_active) AS qrLink, " +
+            "k.status as status, k.bank_account_activated as bankAccountActivated, k.activation_time AS activationTime, " +
+            "k.expiration_time AS expirationTime " +
             "FROM key_active_bank_receive k " +
             "WHERE k.create_at BETWEEN :startDate AND :endDate " +
             "ORDER BY k.create_at DESC " +
@@ -33,4 +35,13 @@ public interface KeyActiveBankReceiveRepository extends JpaRepository<KeyActiveB
     int countByCreateAtBetween(
             @Param("startDate") String startDate,
             @Param("endDate") String endDate);
+
+    @Query(value = "SELECT k.id, k.create_at AS createAt, k.create_by AS createBy, k.duration, " +
+            "k.key_active AS keyActive, CONCAT('https://vietqr.vn/service-active?key=', k.key_active) AS qrLink, " +
+            "k.status AS status, k.activation_time AS activationTime, " +
+            "k.expiration_time AS expirationTime " +
+            "FROM key_active_bank_receive k " +
+            "WHERE k.key_active IN :keys", nativeQuery = true)
+    List<KeyActiveBankReceiveDTO> findByKeyActiveIn(@Param("keys") List<String> keys);
+
 }

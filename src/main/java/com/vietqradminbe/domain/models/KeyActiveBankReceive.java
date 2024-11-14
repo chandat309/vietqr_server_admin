@@ -40,10 +40,19 @@ public class KeyActiveBankReceive implements Serializable {
     @Column(name = "create_by", nullable = false)
     String createBy;
 
+    @Column(name = "bank_account_activated", nullable = false)
+    String bankAccountActivated;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
     User user;
+
+    @Column(name = "activation_time", nullable = false)
+    String activationTime;
+
+    @Column(name = "expiration_time", nullable = false)
+    String expirationTime;
 
     @Override
     public String toString() {
