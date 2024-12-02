@@ -12,6 +12,7 @@ message UpdateKeyActiveRequest {
   string keyActive = 1;
   string bankAccountActivated = 2;
   int32 status = 3;
+  string activationTime =4;
 }
 
 message UpdateKeyActiveResponse {

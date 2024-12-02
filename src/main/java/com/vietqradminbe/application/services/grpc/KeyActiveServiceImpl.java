@@ -4,12 +4,13 @@ import com.example.grpc.KeyActiveServiceGrpc;
 import com.vietqradminbe.domain.models.KeyActiveBankReceive;
 import com.vietqradminbe.domain.repositories.KeyActiveBankReceiveRepository;
 import io.grpc.stub.StreamObserver;
+import net.devh.boot.grpc.server.service.GrpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
+
+@GrpcService
 public class KeyActiveServiceImpl extends KeyActiveServiceGrpc.KeyActiveServiceImplBase {
     private static final Logger logger = LoggerFactory.getLogger(KeyActiveServiceImpl.class);
     @Autowired
@@ -23,6 +24,7 @@ public class KeyActiveServiceImpl extends KeyActiveServiceGrpc.KeyActiveServiceI
             // Log dữ liệu được nhận
             String keyActive = request.getKeyActive();
             String bankAccountActivated = request.getBankAccountActivated();
+            String activationTime = request.getActivationTime();
             int status = request.getStatus();
 
             logger.info("Processing request: keyActive={}, bankAccountActivated={}, status={}", keyActive, bankAccountActivated, status);
@@ -35,6 +37,7 @@ public class KeyActiveServiceImpl extends KeyActiveServiceGrpc.KeyActiveServiceI
                 // Cập nhật dữ liệu
                 keyActiveEntity.setBankAccountActivated(bankAccountActivated);
                 keyActiveEntity.setStatus(status);
+                keyActiveEntity.setActivationTime(activationTime);
                 keyActiveBankReceiveRepository.save(keyActiveEntity);
 
                 logger.info("Updated entity: {}", keyActiveEntity);
