@@ -13,4 +13,5 @@ public interface IKeyActiveBankReceiveService {
     List<String> generateAndSaveKeys(User user, GenerateKeyBankDTO dto);
 
     PagingDTO<KeyActiveBankReceiveDTO> getKeyActiveBankReceives(String startDate, String endDate, int page, int size);
+    List<KeyActiveBankReceiveDTO> getKeyDetailsByKeys(List<String> keys);
 }

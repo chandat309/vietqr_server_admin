@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Data
@@ -13,7 +14,7 @@ import javax.persistence.*;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "key_active_bank_receive")
-public class KeyActiveBankReceive {
+public class KeyActiveBankReceive implements Serializable {
     @Id
     @Column(name = "id")
     String id;
@@ -39,10 +40,19 @@ public class KeyActiveBankReceive {
     @Column(name = "create_by", nullable = false)
     String createBy;
 
+    @Column(name = "bank_account_activated", nullable = false)
+    String bankAccountActivated;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
     User user;
+
+    @Column(name = "activation_time", nullable = false)
+    String activationTime;
+
+    @Column(name = "expiration_time", nullable = false)
+    String expirationTime;
 
     @Override
     public String toString() {

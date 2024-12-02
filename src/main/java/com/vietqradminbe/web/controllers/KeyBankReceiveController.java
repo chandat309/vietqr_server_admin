@@ -13,9 +13,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -95,43 +93,62 @@ public class KeyBankReceiveController {
     }
 
     @GetMapping("/admin-keys-export")
-    public ResponseEntity<byte[]> exportKeysToExcel(
-            @RequestParam List<String> keys) {
+    public ResponseEntity<byte[]> exportKeysToExcel(@RequestParam List<String> keys) {
+        List<KeyActiveBankReceiveDTO> keyDetails = keyActiveBankReceiveService.getKeyDetailsByKeys(keys);
 
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Generated Keys");
 
-            // Tạo hàng tiêu đề
+            // Tạo CellStyle cho tiêu đề
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);  // In đậm
+            headerFont.setFontHeightInPoints((short) 12); // Tăng kích thước chữ
+            headerStyle.setFont(headerFont);
+
+            // Tạo hàng tiêu đề với định dạng mới
             Row headerRow = sheet.createRow(0);
-            headerRow.createCell(0).setCellValue("STT");
-            headerRow.createCell(1).setCellValue("Key dạng String");
-            headerRow.createCell(2).setCellValue("Key dạng QR link");
+            String[] headers = {"STT", "Mã kích hoạt", "QR kích hoạt", "Thời gian hiệu lực", "Khởi tạo", "Trạng thái"};
+
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle); // Áp dụng style cho tiêu đề
+            }
 
             // Điền dữ liệu vào các hàng
-            for (int i = 0; i < keys.size(); i++) {
+            for (int i = 0; i < keyDetails.size(); i++) {
+                KeyActiveBankReceiveDTO keyDetail = keyDetails.get(i);
                 Row row = sheet.createRow(i + 1);
-                String key = keys.get(i);
 
-                row.createCell(0).setCellValue(i + 1); // STT
-                row.createCell(1).setCellValue(key); // Key dạng String
-                row.createCell(2).setCellValue("https://vietqr.vn/service-active?key=" + key); // Key dạng QR link
+                String qrLink = "https://vietqr.vn/service-active?key=" + keyDetail.getKeyActive();
+                String duration = keyDetail.getDuration() + " tháng";
+                String createAt = keyDetail.getCreateAt();
+                String status = keyDetail.getStatus() == 1 ? "Đã kích hoạt" : "Chưa kích hoạt";
+
+                row.createCell(0).setCellValue(i + 1);
+                row.createCell(1).setCellValue(keyDetail.getKeyActive());
+                row.createCell(2).setCellValue(qrLink);
+                row.createCell(3).setCellValue(duration);
+                row.createCell(4).setCellValue(createAt);
+                row.createCell(5).setCellValue(status);
             }
 
             // Thiết lập kích thước cột tự động
-            sheet.autoSizeColumn(0);
-            sheet.autoSizeColumn(1);
-            sheet.autoSizeColumn(2);
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
 
             // Ghi workbook vào một mảng byte
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             workbook.write(outputStream);
 
             // Thiết lập tiêu đề response
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            headers.setContentDispositionFormData("attachment", "GeneratedKeys.xlsx");
+            HttpHeaders headersHttp = new HttpHeaders();
+            headersHttp.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headersHttp.setContentDispositionFormData("attachment", "GeneratedKeys.xlsx");
 
-            return new ResponseEntity<>(outputStream.toByteArray(), headers, HttpStatus.OK);
+            return new ResponseEntity<>(outputStream.toByteArray(), headersHttp, HttpStatus.OK);
         } catch (IOException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
