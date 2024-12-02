@@ -44,4 +44,7 @@ public interface KeyActiveBankReceiveRepository extends JpaRepository<KeyActiveB
             "WHERE k.key_active IN :keys", nativeQuery = true)
     List<KeyActiveBankReceiveDTO> findByKeyActiveIn(@Param("keys") List<String> keys);
 
+
+    KeyActiveBankReceive findByKeyActive(String keyActive);
+
 }
