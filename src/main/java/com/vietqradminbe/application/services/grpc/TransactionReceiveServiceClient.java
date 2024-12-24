@@ -4,13 +4,11 @@ import com.example.grpc.TransactionReceiveServiceServerGrpc;
 import com.vietqradminbe.application.services.grpc.response.TransactionReceiveAdminListDTOImpl;
 import com.vietqradminbe.web.dto.request.RequestFilterTransactionRequest;
 import com.vietqradminbe.web.dto.response.TransactionReceivePaginationResponseDTO;
-import com.vietqradminbe.web.dto.response.interfaces.TransactionReceiveAdminListDTO;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service

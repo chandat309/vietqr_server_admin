@@ -73,6 +73,10 @@ public class ApplicationSecurityConfig {
                                 .requestMatchers(new AntPathRequestMatcher("/api/v1/transactions/v3")).hasAuthority("ADMIN_ROLE")
                                 .requestMatchers(new AntPathRequestMatcher("/api/v1/transactions-refund")).hasAuthority("ADMIN_ROLE")
                                 .requestMatchers(new AntPathRequestMatcher("/api/v1/transaction-logs")).hasAuthority("ADMIN_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transactions/v3/demo-grpc")).hasAuthority("ADMIN_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transaction-logs/demo-grpc")).hasAuthority("ADMIN_ROLE")
+
+
 
                                 // end point for generate key
                                 .requestMatchers(new AntPathRequestMatcher("/api/v1/key-active-bank/generate-key")).hasAuthority("ADMIN_ROLE")

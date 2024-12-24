@@ -12,8 +12,8 @@ import java.util.List;
 @Repository
 public interface TransactionRefundRepository extends JpaRepository<TransactionReceiveEntity, String> {
 
-    @Query(value = "SELECT tr.status, tr.amount, tr.reference_number, tr2.order_id " +
+    @Query(value = "SELECT tr.status, tr.amount, tr.reference_number AS referenceNumber, tr2.order_id AS orderId" +
             "                       FROM transaction_refund tr, transaction_receive tr2 " +
-            "                       WHERE tr.ref_number LIKE CONCAT('%', :referenceNumber , '%') AND tr2.id = tr.transaction_id", nativeQuery = true)
+            "                       WHERE tr.ref_number = :referenceNumber AND tr2.id = tr.transaction_id", nativeQuery = true)
     public List<TransactionRefundAdminDetailDTO> getTransactionRefundAdminDetail(@Param("referenceNumber")String referenceNumber);
 }
