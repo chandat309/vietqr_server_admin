@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc";
+option java_outer_classname = "TransactionRefundServiceServerProto";
+
+service TransactionRefundServiceServer {
+  rpc GetTransactionRefundAdminDetail (GetTransactionRefundRequest) returns (TransactionRefundGrpcDTOList);
+}
+
+message GetTransactionRefundRequest {
+  string referenceNumber = 1;
+}
+
+message TransactionRefundGrpcDTOList{
+  repeated TransactionRefundAdminDetailDTO transactionRefundGrpcDTO = 1;
+}
+
+
+message TransactionRefundAdminDetailDTO {
+  int32 status = 1;
+  int32 amount = 2;
+  string referenceNumber = 3;
+  string orderId = 4;
+}

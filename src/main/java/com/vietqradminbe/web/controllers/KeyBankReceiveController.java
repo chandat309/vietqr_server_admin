@@ -159,7 +159,7 @@ public class KeyBankReceiveController {
         String result = "";
         try {
             if (token != null && !token.trim().isEmpty()) {
-                String secretKey = "A0B1C2D3E4F5061728394A5B6C7D8E9F1011121314151617181920212223242526272829303132333435363738393A3B3C3D3E3F40414243444546474849";
+                String secretKey = "mySecretKey";
                 String jwtToken = token.substring(7); // Bỏ đi tiền tố "Bearer "
 
                 Claims claims = Jwts.parser()

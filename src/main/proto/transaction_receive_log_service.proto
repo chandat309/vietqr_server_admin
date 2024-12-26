@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc";
+option java_outer_classname = "TransactionReceiveLogServiceServerProto";
+
+service TransactionReceiveLogServiceServer {
+  rpc GetTransactionLogsByTransIdGrpc (GetLogRequest) returns (TransactionReceiveLogGrpcDTOList);
+}
+
+message GetLogRequest {
+  string transactionId = 1;
+}
+
+message TransactionReceiveLogGrpcDTOList{
+  repeated TransactionReceiveLogGrpcDTO transactionReceiveLogGrpcDTO = 1;
+}
+
+
+message TransactionReceiveLogGrpcDTO {
+  string id = 1;
+  int32 type = 2;
+  string transactionId = 3;
+  string status = 4;
+  int32 statusCode = 5;
+  string message = 6;
+  string urlCallBack = 7;
+  int64 timeRequest = 8;
+  int64 timeResponse = 9;
+}

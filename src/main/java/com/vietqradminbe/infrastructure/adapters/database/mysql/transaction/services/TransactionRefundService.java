@@ -19,6 +19,7 @@ public class TransactionRefundService implements ITransactionRefundService {
 
     @Override
     public List<TransactionRefundAdminDetailDTO> getTransactionRefundAdminDetail(String referenceNumber) {
+        referenceNumber = referenceNumber.trim().replaceAll("\n", "");
         return transactionRefundRepository.getTransactionRefundAdminDetail(referenceNumber);
     }
 }
