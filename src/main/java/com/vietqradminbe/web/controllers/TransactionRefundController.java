@@ -115,7 +115,7 @@ public class TransactionRefundController {
             String authorizationHeader = currentRequest.getHeader("Authorization");
             String token = null;
             GetTransactionRefundRequest grpcRequest = GetTransactionRefundRequest.newBuilder()
-                    .setReferenceNumber(referenceNumber)
+                    .setReferenceNumber(referenceNumber.trim().replace("\n", ""))
                     .build();
             List<TransactionRefundGrpcDTOImpl> trans = transactionRefundServiceClient.getTransactionRefundGrpc(grpcRequest);
 

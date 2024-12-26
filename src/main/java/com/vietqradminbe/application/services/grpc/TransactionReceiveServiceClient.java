@@ -31,6 +31,12 @@ public class TransactionReceiveServiceClient {
         com.example.grpc.TypeA grpcTypeA = null;
         if (request.getTypeA() != null) {
             grpcTypeA = com.example.grpc.TypeA.newBuilder()
+                    .setType("")
+                    .setFrom(0)
+                    .setTo(0)
+                    .build();
+        } else {
+            grpcTypeA = com.example.grpc.TypeA.newBuilder()
                     .setType(request.getTypeA().getType())
                     .setFrom(request.getTypeA().getFrom())
                     .setTo(request.getTypeA().getTo())
@@ -43,6 +49,11 @@ public class TransactionReceiveServiceClient {
             grpcTypeB = com.example.grpc.TypeB.newBuilder()
                     .setType(request.getTypeB().getType())
                     .setMerchantName(request.getTypeB().getMerchantName())
+                    .build();
+        } else {
+            grpcTypeB = com.example.grpc.TypeB.newBuilder()
+                    .setType("")
+                    .setMerchantName("")
                     .build();
         }
 
@@ -58,6 +69,16 @@ public class TransactionReceiveServiceClient {
                     .setSubCode(request.getTypeC().getSubCode())
                     .setContent(request.getTypeC().getContent())
                     .build();
+        } else {
+            grpcTypeC = com.example.grpc.TypeC.newBuilder()
+                    .setType("")
+                    .setBankAccount("")
+                    .setReferenceNumber("")
+                    .setOrderId("")
+                    .setTerminalCode("")
+                    .setSubCode("")
+                    .setContent("")
+                    .build();
         }
 
         // Convert TypeD
@@ -66,6 +87,11 @@ public class TransactionReceiveServiceClient {
             grpcTypeD = com.example.grpc.TypeD.newBuilder()
                     .setType(request.getTypeD().getType())
                     .setStatus(request.getTypeD().getStatus())
+                    .build();
+        } else {
+            grpcTypeD = com.example.grpc.TypeD.newBuilder()
+                    .setType("")
+                    .setStatus(0)
                     .build();
         }
 
