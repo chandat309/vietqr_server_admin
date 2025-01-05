@@ -41,12 +41,6 @@ public class TransactionReceiveServiceClient {
                     .setFrom(request.getTypeA().getFrom())
                     .setTo(request.getTypeA().getTo())
                     .build();
-        } else {
-            grpcTypeA = com.example.grpc.TypeA.newBuilder()
-                    .setType("")
-                    .setFrom(0)
-                    .setTo(0)
-                    .build();
         }
 
         // Convert TypeB
@@ -55,11 +49,6 @@ public class TransactionReceiveServiceClient {
             grpcTypeB = com.example.grpc.TypeB.newBuilder()
                     .setType(request.getTypeB().getType())
                     .setMerchantName(request.getTypeB().getMerchantName() != null ? request.getTypeB().getMerchantName() : "")
-                    .build();
-        } else {
-            grpcTypeB = com.example.grpc.TypeB.newBuilder()
-                    .setType("")
-                    .setMerchantName("")
                     .build();
         } else {
             grpcTypeB = com.example.grpc.TypeB.newBuilder()
@@ -79,16 +68,6 @@ public class TransactionReceiveServiceClient {
                     .setTerminalCode(request.getTypeC().getTerminalCode() != null ? request.getTypeC().getTerminalCode() : "")
                     .setSubCode(request.getTypeC().getSubCode() != null ? request.getTypeC().getSubCode() : "")
                     .setContent(request.getTypeC().getContent() != null ? request.getTypeC().getContent() : "")
-                    .build();
-        } else {
-            grpcTypeC = com.example.grpc.TypeC.newBuilder()
-                    .setType("")
-                    .setBankAccount("")
-                    .setReferenceNumber("")
-                    .setOrderId("")
-                    .setTerminalCode("")
-                    .setSubCode("")
-                    .setContent("")
                     .build();
         } else {
             grpcTypeC = com.example.grpc.TypeC.newBuilder()
