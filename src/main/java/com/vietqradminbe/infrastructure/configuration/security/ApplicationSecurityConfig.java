@@ -53,36 +53,38 @@ public class ApplicationSecurityConfig {
 
                         requests.requestMatchers(whiteListMatchers).permitAll()
                                 // end point for users
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/users")).hasAuthority("ADMIN_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/users")).hasAnyAuthority("ADMIN_ROLE","IT_SUPPORT_ROLE")
 
                                 // end point for roles
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/roles")).hasAuthority("ADMIN_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/roles")).hasAnyAuthority("ADMIN_ROLE","IT_SUPPORT_ROLE")
 
                                 // end point for functions (feature)
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/functions")).hasAuthority("ADMIN_ROLE")
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/functions/*")).hasAuthority("ADMIN_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/functions")).hasAnyAuthority("ADMIN_ROLE", "IT_SUPPORT_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/functions/*")).hasAnyAuthority("ADMIN_ROLE", "IT_SUPPORT_ROLE")
 
                                 // end point for group function (feature)
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/group-functions")).hasAuthority("ADMIN_ROLE")
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/group-functions/*")).hasAuthority("ADMIN_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/group-functions")).hasAnyAuthority("ADMIN_ROLE", "IT_SUPPORT_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/group-functions/*")).hasAnyAuthority("ADMIN_ROLE", "IT_SUPPORT_ROLE")
 
                                 // end point for transactions
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transactions")).hasAuthority("ADMIN_ROLE")
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transactions/*")).hasAuthority("ADMIN_ROLE")
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transactions/v2")).hasAuthority("ADMIN_ROLE")
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transactions/v3")).hasAuthority("ADMIN_ROLE")
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transactions-refund")).hasAuthority("ADMIN_ROLE")
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transaction-logs")).hasAuthority("ADMIN_ROLE")
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transactions/v3/demo-grpc")).hasAuthority("ADMIN_ROLE")
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transaction-logs/demo-grpc")).hasAuthority("ADMIN_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transactions")).hasAnyAuthority("ADMIN_ROLE", "IT_SUPPORT_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transactions/*")).hasAnyAuthority("ADMIN_ROLE", "IT_SUPPORT_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transactions/v2")).hasAnyAuthority("ADMIN_ROLE", "IT_SUPPORT_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transactions/v3")).hasAnyAuthority("ADMIN_ROLE", "IT_SUPPORT_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transactions-refund")).hasAnyAuthority("ADMIN_ROLE", "IT_SUPPORT_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transaction-logs")).hasAnyAuthority("ADMIN_ROLE", "IT_SUPPORT_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transactions/v3/demo-grpc")).hasAnyAuthority("ADMIN_ROLE", "IT_SUPPORT_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/transaction-logs/demo-grpc")).hasAnyAuthority("ADMIN_ROLE", "IT_SUPPORT_ROLE")
 
 
 
                                 // end point for generate key
                                 .requestMatchers(new AntPathRequestMatcher("/api/v1/key-active-bank/generate-key")).hasAuthority("ADMIN_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/active-keys")).hasAuthority("ADMIN_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/admin-keys-export")).hasAuthority("ADMIN_ROLE")
 
                                 // end point for activity user logs
-                                .requestMatchers(new AntPathRequestMatcher("/api/v1/logs")).hasAuthority("ADMIN_ROLE")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/logs")).hasAnyAuthority("ADMIN_ROLE", "IT_SUPPORT_ROLE")
                                 // end point for user
                                 .requestMatchers(new AntPathRequestMatcher("/api/v1/auth/reset-password")).hasAnyAuthority("ADMIN_ROLE", "ACCOUNTANCE_ROLE", "IT_SUPPORT_ROLE")
                                 .anyRequest()
