@@ -1,5 +1,8 @@
 package com.vietqradminbe.application.services;
 
+import com.example.grpc.SaveKeyActiveRequest;
+import com.example.grpc.SaveKeyActiveResponse;
+import com.vietqradminbe.application.services.grpc.KeyActiveGrpcClient;
 import com.vietqradminbe.application.services.interfaces.IKeyActiveBankReceiveService;
 import com.vietqradminbe.domain.models.KeyActiveBankReceive;
 import com.vietqradminbe.domain.models.User;
@@ -15,17 +18,19 @@ import com.vietqradminbe.web.dto.response.PagingDTO;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class KeyActiveBankReceiveService implements IKeyActiveBankReceiveService {
 
     KeyActiveBankReceiveRepository keyActiveBankReceiveRepository;
-    KeyActiveBankReceiveTransactionRepository keyActiveBankReceiveTransactionRepository;
+    KeyActiveGrpcClient keyActiveGrpcClient;
 
 
     @Override
@@ -45,6 +50,8 @@ public class KeyActiveBankReceiveService implements IKeyActiveBankReceiveService
 
             String vietnamTimeString = TimeHelperUtil.getCurrentTime();
             String expirationTimeString = TimeHelperUtil.calculateExpirationTime(vietnamTimeString, dto.getDuration());
+
+            // Tạo đối tượng KeyActiveBankReceive cho admin database
             KeyActiveBankReceive entityAdmin = KeyActiveBankReceive.builder()
                     .id(UUID.randomUUID().toString())
                     .keyActive(keyActive)
@@ -61,23 +68,32 @@ public class KeyActiveBankReceiveService implements IKeyActiveBankReceiveService
                     .build();
             entitiesAdmin.add(entityAdmin);
 
+            // Chuyển đổi thời gian tạo sang epoch
             long createAtAsLong = TimeHelperUtil.convertVietnamTimeStringToEpochLong(vietnamTimeString);
-            KeyActiveBankReceiveEntity entityTransaction = KeyActiveBankReceiveEntity.builder()
-                    .id(entityAdmin.getId())
-                    .keyActive(keyActive)
-                    .secretKey(secretKey)
-                    .valueActive(valueActive)
-                    .duration(dto.getDuration())
-                    .createAt(createAtAsLong)
-                    .status(0)
-                    .version(0)
-                    .bankId("")
+
+            // Gọi gRPC client để lưu thông tin
+            SaveKeyActiveRequest request = SaveKeyActiveRequest.newBuilder()
+                    .setId(entityAdmin.getId())
+                    .setKeyActive(keyActive)
+                    .setSecretKey(secretKey)
+                    .setValueActive(valueActive)
+                    .setDuration(dto.getDuration())
+                    .setCreateAt(createAtAsLong)
+                    .setStatus(0)
+                    .setVersion(0)
+                    .setBankId("")
                     .build();
-            entitiesTransaction.add(entityTransaction);
+
+            SaveKeyActiveResponse response = keyActiveGrpcClient.saveKeyActive(request);
+
+            if (!response.getSuccess()) {
+                log.error("Failed to save keyActive via gRPC: {}", response.getMessage());
+                throw new RuntimeException("gRPC call failed: " + response.getMessage());
+            }
         }
 
+        // Lưu vào admin database
         keyActiveBankReceiveRepository.saveAll(entitiesAdmin);
-        keyActiveBankReceiveTransactionRepository.saveAll(entitiesTransaction);
         return keyActives;
     }
 

@@ -6,6 +6,7 @@ option java_outer_classname = "KeyActiveServiceProto";
 
 service KeyActiveService {
   rpc UpdateKeyActive(UpdateKeyActiveRequest) returns (UpdateKeyActiveResponse);
+  rpc SaveKeyActive(SaveKeyActiveRequest) returns (SaveKeyActiveResponse);
 }
 
 message UpdateKeyActiveRequest {
@@ -16,6 +17,24 @@ message UpdateKeyActiveRequest {
 }
 
 message UpdateKeyActiveResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+
+message SaveKeyActiveRequest {
+  string id = 1;
+  int32 status = 2;
+  int32 duration = 3;
+  string keyActive = 4;
+  string valueActive = 5;
+  string secret_key = 6;
+  int64 create_at = 7;
+  int32 version = 8;
+  string bank_id = 9;
+}
+
+message SaveKeyActiveResponse {
   bool success = 1;
   string message = 2;
 }
